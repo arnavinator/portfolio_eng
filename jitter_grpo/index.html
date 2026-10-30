@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Arnav's Engineering Portfolio</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../style.css" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],       // inline delimiters
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],    // display delimiters
+        packages: ['base', 'ams']                       // load AMS TeX extensions
+      },
+      options: {
+        // ensure MathJax processes dynamically-added content
+        processHtmlClass: 'arithmatex',
+        skipHtmlTags: ['script','noscript','style','textarea','pre','code']
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-sm navbar-dark">
+    <div class="container-fluid d-flex justify-content-between align-items-center px-5">
+      <h2 class="nav-title">Arnav's Engineering Portfolio</h2>
+      <div class="navbar-nav">
+        <a class="nav-link" href="../index.html">Home</a>
+        <a class="nav-link" href="../about.html">About Me</a>
+
+        <div class="nav-item dropdown">
+          <!-- now a normal in-page link -->
+          <a
+            class="nav-link active"
+            href="../index.html#selected-work"
+            id="projectsDropdown"
+            aria-expanded="false"
+          >
+            Selected Work <span style="margin-left:1px; font-size:0.99em;">▾</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="projectsDropdown" id="dropdown-content"></ul>
+        </div>
+
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero-section-proj">
+    <div class="textcontainer">
+      <h1 class="oswald-heading">
+        <u>Jitter-GRPO: New Research in Fine-Tuning Flow Matching VLAs</u>
+      </h1>
+      <h3 class="oswald-heading"><span style="color: rgb(242, 242, 242);">
+        Jitter noise to GRPO Flow Matching surrogate for PEFT on NVIDIA's Isaac GR00T VLA
+      </span></h3>
+
+      <h6><span style="color: rgb(242, 242, 242);">
+        <em>Skills: PyTorch, RL Algorithm Design (GRPO), Flow Matching, VLA Fine-Tuning (LoRA), NVIDIA Isaac GR00T, RoboCasa Simulation, AWS EC2, TensorBoard Analysis</em>
+      </span></h6>
+    </div>
+  </section>
+
+  <section class="textcontainer">
+    <h2 class="mb-4">Overview</h2>
+
+    <div class="row gx-0 mb-4 mt-4 align-items-center">
+      <div style="width: 4%; padding:0;" class="custom-column">
+      </div>
+
+      <div style="width: 92%; padding:0;" class="custom-column">
+        <figure style="margin: 0;">
+          <video autoplay muted loop playsinline class="img-fluid">
+            <source src="./CoffeeServeMug_fail_vs_success_side_by_side_white_gap.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+          <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+            <em>Fig. 1: Failed (left) vs. successful (right) CoffeeServeMug rollouts, each shown from two exterior cameras and the wrist camera</em>
+          </figcaption>
+        </figure>
+      </div>
+
+      <div style="width: 4%; padding:0;" class="custom-column">
+      </div>
+
+    </div>
+
+    <div class="row gx-0 mb-4 mt-4 align-items-center">
+      <div style="width: 2%; padding:0;" class="custom-column">
+      </div>
+
+      <div style="width: 46%; padding:0;" class="custom-column">
+      <figure style="margin: 0;">
+        <img src="./poc_success_rate.png" class="img-fluid">
+        <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+          <em>Preview of <a href="#poc_training">Fig. 12</a>: success from a single hard start state rises from 10% to 92%</em>
+        </figcaption>
+      </figure>
+      </div>
+
+      <div style="width: 2%; padding:0;" class="custom-column">
+      </div>
+
+      <div style="width: 49%; padding:0;" class="custom-column">
+      <figure style="margin: 0;">
+        <img src="./full_fans3d_wide.png" class="img-fluid">
+        <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+          <em>Preview of <a href="#full_fans">Fig. 17</a>: in all four kitchens, the action fan tightens around higher-advantage actions (increasing the likelihood that randomly drawn noise samples land on good actions)</em>
+        </figcaption>
+      </figure>
+      </div>
+
+      <div style="width: 1%; padding:0;" class="custom-column">
+      </div>
+
+    </div>
+
+    In this project, I developed <strong>Jitter-GRPO</strong>, an online reinforcement learning (RL) method for <em>fine-tuning flow-matching
+    vision-language-action (VLA) models</em>. I apply it to NVIDIA's <a href="https://github.com/NVIDIA/Isaac-GR00T" target="_blank">GR00T N1.6</a>,
+    a 3.3B-parameter VLA, on the RoboCasa CoffeeServeMug task, in which a PandaOmron robot grasps a mug from under a coffee machine and sets it
+    upright on the counter. Jitter-GRPO builds on Group Relative Policy Optimization (GRPO)
+    <a href="https://arxiv.org/abs/2402.03300" target="_blank">[Shao et al., 2024]</a> and trains only LoRA adapters
+    <a href="https://arxiv.org/abs/2106.09685" target="_blank">[Hu et al., 2021]</a> (0.44% of the weights) on a single 24 GB A10G GPU.
+    <br><br>
+    For a given observation, GR00T's noise samples form a "unimodal fan" of candidate actions, and the center of that fan is often not a good action
+    for certain RoboCasa scenarios (see <a href="#motivation">Motivation</a>). The goal is to reshape the fan so that a randomly drawn noise sample lands on a good action more
+    often.
+    <br><br>
+    Jitter-GRPO makes two novel contributions:
+    <ul>
+      <li><strong>Jitter as an implicit Jacobian penalty:</strong> on successful chunks, the policy is also trained to reach the same action from
+        slightly perturbed noise. In expectation, this <a href="#jitter_jacobian">penalizes the action's sensitivity to its input noise</a> with no
+        extra compute or network/noise sampler change.</li>
+      <li><strong>A stabilized FM surrogate for robotics GRPO:</strong> following FPO
+        <a href="https://arxiv.org/abs/2507.21053" target="_blank">[McAllister et al., 2025]</a>, the flow-matching (FM) loss stands in for the
+        intractable likelihood ratio, and each GRPO group compares full episodes from the same start state. AWR-on-success, a relative lower
+        clip, and dynamically balanced minibatches correct the surrogate's success/failure imbalance.</li>
+    </ul>
+    Jitter-GRPO improves GR00T in both experiments:
+    <ul>
+      <li><strong><a href="#proof_of_concept">Proof of concept</a>:</strong> from a hard start state where base GR00T succeeds 10% of the time,
+        success rises to 92% within six updates as the policy learns a new approach angle.</li>
+      <li><strong><a href="#full_training">Full training</a>:</strong> across four CoffeeServeMug kitchens, success rises from 66% to 86% over 160
+        independent evaluation rollouts, improving every kitchen and cutting failures by 59%. Each kitchen's action fan tightens by 21–25%, and
+        the policy passes 32% less of its initial noise directly into its actions.</li>
+    </ul>
+  </section>
+
+  <div class="textcontainer">
+
+    <section class="table-of-contents">
+      <hr>
+
+      <h2 class="mb-3">Table of Contents</h2>
+      <div class="row toc-columns">
+        <div class="col-md-6">
+          <ul>
+            <li><a href="#vla_peft_overview">VLA / PEFT Overview</a></li>
+            <ul>
+              <li><a href="#gr00t_panda_omron">GR00T N1.6 on PandaOmron</a></li>
+              <li><a href="#lora_targets">LoRA Targets</a></li>
+            </ul>
+            <li><a href="#motivation">Motivation: Investigating GR00T's Denoising</a></li>
+            <ul>
+              <li><a href="#mean_action">Is the mean a good action?</a></li>
+              <li><a href="#diagnosis_to_jitter_grpo">From Diagnosis to Jitter-GRPO</a></li>
+            </ul>
+            <li><a href="#theory">Jitter-GRPO Theory and Implementation</a></li>
+            <ul>
+              <li><a href="#fm_surrogate">Flow Matching (FM) Surrogate Log-Probability</a></li>
+              <li><a href="#grpo_robot">Applying the FM Surrogate to GRPO on Robot Trajectories</a></li>
+              <li><a href="#jitter_jacobian"><em>Jitter as a Jacobian Regularizer</em></a></li>
+              <li><a href="#awr_on_success">Optional Reinforcing Successes (AWR-on-Success)</a></li>
+              <li><a href="#relative_clip">Relative Lower Clip</a></li>
+              <li><a href="#advantage_norm">Advantage Normalization</a></li>
+              <li><a href="#implementation_details">Additional Implementation Details</a></li>
+              <li><a href="#related_work">Related Work</a></li>
+            </ul>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <ul>
+            <li><a href="#proof_of_concept">Proof of Concept Example (overfit on single scene)</a></li>
+            <ul>
+              <li><a href="#poc_training">Training: 10% → 92% Success</a></li>
+              <li><a href="#poc_approach">Learning a New Approach Angle</a></li>
+            </ul>
+            <li><a href="#full_training">Full Training Example</a></li>
+            <ul>
+              <li><a href="#full_eval">Training and Evaluation: 66% → 86% Across Four Kitchens</a></li>
+              <li><a href="#full_fans">A Tighter Fan in Every Kitchen</a></li>
+              <li><a href="#full_noise"><em>Jacobian Penalty Leads to Less Noise Leaking into the Actions</em></a></li>
+            </ul>
+            <li><a href="#future_directions">Future Directions / Reflections</a></li>
+            <li><a href="#code">Full Code</a></li>
+          </ul>
+        </div>
+      </div>
+      <br>
+    </section>
+
+
+    <section id="vla_peft_overview">
+      <hr>
+      <h2>VLA / PEFT Overview</h2>
+
+      <h5 id="gr00t_panda_omron">GR00T N1.6 on PandaOmron</h5>
+      <a href="https://github.com/NVIDIA/Isaac-GR00T" target="_blank">GR00T N1.6</a> is NVIDIA's open 3.3B-parameter vision-language-action (VLA) model.
+      Each query maps three camera images, the robot state, and a language instruction to a 16-step chunk of actions:
+
+      <figure style="margin: 20px 0; text-align: center;">
+        <pre class="diagram">
+ ┌───────────────┬─ re-plan with new observations ───┐
+ │               ▼                                   ▼
+ │    3 cameras + instruction                  state (16-d)
+ │               │                                   │
+ │               ▼                                   ▼
+ │  ┌───────────────────────────┐              state encoder
+ │  │ Eagle VLM  (1.9B, frozen) │                    │ 1 token
+ │  │ SigLIP2 + Qwen3-1.7B      │                    │
+ │  └────────────┬──────────────┘                    │
+ │               │ VL tokens (cross-attention)       │
+ │               ▼                                   ▼
+ │  <span class="lora">┌─────────────────────────────────────────────────────┐</span>
+ │  <span class="lora">│</span> <span class="lora">DiT action head  (1.1B, 32 blocks, LoRA)</span>            <span class="lora">│</span>◄──┐
+ │  <span class="lora">│</span> <span class="lora">51 tokens = 1 state + 50 action</span>                     <span class="lora">│</span>   │
+ │  <span class="lora">└──────────────────────────┬──────────────────────────┘</span>   │
+ │                             ▼                              │
+ │                      action decoder                 action encoder
+ │                             │ velocity v                   ▲
+ │                             ▼                              │
+ │                       a ← a + v/n ─────────── a ───────────┘
+ │                             │ <span class="note">a starts as noise;</span>
+ │                             │ <span class="note">a is complete after n=4 steps</span>
+ │                             ▼
+ │               action chunk: 16 steps × 12-d
+ │                             │
+ │                             ▼
+ └──────── robosuite OSC controller: execute 8 steps</pre>
+        <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+          <em>Fig. 2: One GR00T N1.6 query (green: the DiT, where LoRA is applied)</em>
+        </figcaption>
+      </figure>
+
+      <ul>
+        <li><strong>Eagle VLM backbone</strong> (1.9B, frozen): a SigLIP2 vision encoder and Qwen3-1.7B LLM (first 16 of 28 layers) embed the instruction
+          and images as 2048-d vision-language (VL) tokens, once per query.</li>
+        <li><strong>DiT action head</strong> (1.1B): 32 transformer blocks over 51 tokens (1 state + 50 action). Odd blocks self-attend; even blocks
+          cross-attend the VL tokens, alternating text and image tokens. AdaLayerNorm conditions every block on the flow-matching timestep: it is a LayerNorm whose scale and shift
+          are generated from the timestep embedding, $\mathrm{AdaLN}(x, \tau) = \mathrm{LayerNorm}(x) \odot (1 + \mathrm{scale}(\tau)) + \mathrm{shift}(\tau)$.</li>
+        <li><strong>Flow matching</strong>: starting from noise $a^{0} \sim \mathcal{N}(0, I)$, the DiT predicts a velocity $v_\theta(a^{\tau} \mid \tau, o)$
+          conditioned on the flow time $\tau$ and observation $o$, and $n$ Euler steps $a^{\tau + 1/n} = a^{\tau} + \tfrac{1}{n}\, v_\theta(a^{\tau} \mid \tau, o)$
+          carry the flow time $\tau$ from 0 to 1 (GR00T uses $n = 4$).</li>
+        <li><strong>Embodiment MLPs</strong>: the state encoder, action encoder, and action decoder keep separate weights per robot
+          (PandaOmron is embodiment 13); inputs and outputs are zero-padded to 128 dims.</li>
+      </ul>
+
+      For CoffeeServeMug, GR00T and PandaOmron exchange:
+      <table class="table table-bordered table-sm mt-2" style="font-size: 0.9em;">
+        <tr style="background-color: #f2f2f2;">
+          <th></th>
+          <th>Signal</th>
+          <th>Notes</th>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><strong>Cameras</strong> (3 × 256×256×3)</td>
+          <td>Left &amp; right exocentric views (2 × 256×256×3); wrist egocentric view (256×256×3)</td>
+          <td>Rendered at 512×512, resized to 256×256</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><strong>State</strong> (16-d)</td>
+          <td>End-effector position (3-d) &amp; quaternion (4-d) relative to the base; gripper finger positions (2-d); base position (3-d) &amp; quaternion (4-d)</td>
+          <td>No joint angles or velocities</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><strong>Language</strong></td>
+          <td>"pick the mug from under the coffee machine dispenser and place it on the counter"</td>
+          <td>Fixed throughout episode</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><strong>Action</strong> (16 × 12-d)</td>
+          <td>End-effector Δposition (3-d) &amp; Δrotation (3-d, axis-angle); gripper open/close (1-d); base velocity (3-d) &amp; torso height (1-d); arm/base mode (1-d)</td>
+          <td>Operational space control (OSC) deltas, not joint angles or torques</td>
+        </tr>
+      </table>
+
+      The policy runs at 20 Hz: PandaOmron executes the first 8 of the 16 predicted steps (0.4 s), then GR00T re-plans from new observations.
+      Robosuite's OSC controller converts each end-effector delta into joint torques. An episode succeeds once the gripper has released the mug
+      on the counter in the upright position.
+      <br><br>
+
+      <h5 id="lora_targets">LoRA Targets</h5>
+      Parameter-efficient fine-tuning (PEFT) adapts a large pretrained model by training a small set of extra parameters while the original
+      weights stay frozen. LoRA <a href="https://arxiv.org/abs/2106.09685" target="_blank">[Hu et al., 2021]</a> is a PEFT method: it keeps each
+      targeted weight $W$ frozen and learns a low-rank update, $W + \tfrac{\alpha}{r} BA$ with $B \in \mathbb{R}^{d \times r}$,
+      $A \in \mathbb{R}^{r \times k}$, and $r \ll \min(d, k)$. Since $B$ starts at zero, fine-tuning begins exactly at the pretrained model.
+      Low rank suffices because it keeps the policy close to pretrained GR00T while allowing for manageable training costs.
+      <br><br>
+      Jitter-GRPO trains only LoRA adapters (rank $r = 16$, $\alpha = 32$) inside the DiT. Everything else stays frozen: the VLM backbone,
+      the embodiment MLPs (their 3-D per-embodiment weights don't fit standard LoRA), and each block's AdaLayerNorm projection.
+      <ul>
+        <li><strong>Each of the 32 blocks</strong>: attention <code>to_q</code>, <code>to_k</code>, <code>to_v</code>, <code>to_out</code>
+          and both feed-forward projections (6 modules).</li>
+        <li><strong>Output layers</strong>: <code>proj_out_1</code> (scale/shift of the final AdaLayerNorm) and <code>proj_out_2</code>
+          (projection into the action decoder).</li>
+        <li><strong>Total</strong>: 194 modules, 14.5M trainable parameters (0.44% of GR00T's 3.3B).</li>
+      </ul>
+
+      <div class="row gx-3 mb-4 mt-4">
+        <div class="col-xl-6">
+          <figure style="margin: 0; text-align: center;">
+            <pre class="diagram">
+═══════════════ ×32 BasicTransformerBlock ═══════════════
+   hidden_states [B, 51, 1536] ──────────────────┐ (skip)
+     │                                           │
+     ▼                                           │
+   norm1 = AdaLayerNorm(1536)  ◄── silu(temb)    │
+     │  .linear 1536 → 3072 → scale, shift       │
+<span class="note">#</span>    │    <span class="note">^ frozen, not a LoRA target</span>            │
+     │  .norm   LayerNorm (no affine)            │
+     ▼                                           │
+  ┌──────── SELF / CROSS ATTENTION ────────┐     │
+<span class="lora">+</span> │ <span class="lora">attn1.to_q      1536 → 1536</span>            │     │
+<span class="lora">+</span> │ <span class="lora">attn1.to_k      1536* → 1536</span>           │     │
+<span class="lora">+</span> │ <span class="lora">attn1.to_v      1536* → 1536</span>           │     │
+<span class="lora">+</span> │ <span class="lora">attn1.to_out.0  1536 → 1536</span>            │     │
+<span class="note">#</span> │ <span class="note">even: cross-attend VL tokens</span>           │     │
+<span class="note">#</span> │ <span class="note">  (idx%4==0 text, idx%4==2 image)</span>      │     │
+<span class="note">#</span> │ <span class="note">odd:  self-attend</span>                      │     │
+  └────────────────────────────────────────┘     │
+     ▼                                           │
+    (+) residual ◄───────────────────────────────┤ (skip)
+     ▼                                           │
+   norm3 = LayerNorm(1536)                       │
+  ┌───────── FEED FORWARD (GELU) ──────────┐     │
+<span class="lora">+</span> │ <span class="lora">ff.net.0.proj   1536 → 6144</span>            │     │
+<span class="lora">+</span> │ <span class="lora">ff.net.2        6144 → 1536</span>            │     │
+  └────────────────────────────────────────┘     │
+     ▼                                           │
+    (+) residual ◄───────────────────────────────┘
+═════════════════════════════════════════════════════════
+<span class="note"># * 2048 → 1536 in cross-attention blocks</span>
+<span class="note"># 6 LoRA modules × 32 blocks = 192 modules</span></pre>
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 3: LoRA targets (green) in each DiT block</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="col-xl-6">
+          <figure style="margin: 0; text-align: center;">
+            <pre class="diagram">
+   hidden_states [B, 51, 1536]  (after 32 blocks)
+     │
+     ▼
+  ┌─── FINAL AdaLayerNorm (inline in DiT.forward) ───┐
+  │ norm_out = LayerNorm(1536, no affine)            │
+<span class="note">#</span> │     │ <span class="note">the barrier: strips mean &amp; scale,</span>          │
+<span class="note">#</span> │     │ <span class="note">so a block ΔW that only rescales</span>           │
+<span class="note">#</span> │     │ <span class="note">the residual stream is erased</span>              │
+  │     │                 silu(temb)                 │
+  │     │                     │                      │
+<span class="lora">+</span> │     │                 <span class="lora">proj_out_1  1536 → 3072</span>    │
+  │     │                     │                      │
+  │     │                 .chunk(2) → shift, scale   │
+  │     ▼                     ▼                      │
+  │ norm_out(h) · (1 + scale) + shift                │
+<span class="note">#</span> │   <span class="note">gain + shift on all 51 output tokens</span>           │
+  └──────────────────────────────────────────────────┘
+     ▼
+<span class="lora">+</span>  <span class="lora">proj_out_2   1536 → 1024</span>   (output projection)
+     ▼   [B, 51, 1024]
+   action_decoder  (embodiment MLP, frozen)
+     ▼   drop the state token
+   velocity v  [B, 50, 128]</pre>
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 4: LoRA targets (green) in the DiT output layers</em>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <br>
+    </section>
+
+    <section id="motivation">
+      <hr>
+      <h2>Motivation: Investigating GR00T's Denoising</h2>
+
+      To see how GR00T turns noise into actions, I fixed one CoffeeServeMug observation (gripper approaching the mug), held every DiT input
+      except the noise constant, and denoised 100 noise seeds with the default 4 Euler steps.
+      Each line is one seed's cumulative end-effector delta over the 16-step chunk.
+
+      <div class="row gx-0 mb-4 mt-4 align-items-center">
+        <div style="width: 5.5%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 35%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./scene_side_wrist.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 5: The fixed observation, from the left exocentric camera (left) and wrist camera (right)</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 2%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 25%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./fan_4step.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 6: 100 noise seeds, 4 Euler steps</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 2%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 25%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./fan_1step.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 7: The same 100 seeds, 1 Euler step</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 5.5%; padding:0;" class="custom-column">
+        </div>
+      </div>
+
+      <div class="row gx-0 mb-4 mt-4 align-items-center">
+        <div style="width: 9.2%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 52.2%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./mean_4step_vs_1step.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 8: Mean over the 100 seeds, 4 steps (black) vs. 1 step (green)</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 6%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 23.4%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./fan_4step_seed305067.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 9: 100 seeds, 4 steps, in another episode</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 9.2%; padding:0;" class="custom-column">
+        </div>
+      </div>
+
+      Three patterns stand out:
+      <ul>
+        <li><strong>Similar means:</strong> averaged over seeds, 1-step and 4-step chunks follow nearly the same path (Fig. 8).</li>
+        <li><strong>Extra Euler steps add spread</strong> (Figs. 6, 7):
+          <ul>
+            <li>Seed-to-seed variance is 1.61 with 4 steps vs. 0.025 with 1 step (summed over x, y, z): <strong>~65× larger</strong>.</li>
+            <li>A second observation, taken after the grasp, shows the same gap: 1.67 vs. 0.037 (<strong>~46×</strong>).</li>
+          </ul>
+        </li>
+        <li><strong>One fan, not several strategies:</strong> the seeds form a single unimodal fan around the mean (Figs. 6, 9),
+          not distinct groups of equally valid strategies.
+          <ul>
+            <li>The promise of flow-matching VLAs is <em>multimodality</em>: different noise samples should yield diverse, equally valid
+              behaviors. The observations measured here instead suggest GR00T behaves more like a <em>unimodal fan</em>.</li>
+          </ul>
+        </li>
+      </ul>
+      <br>
+      <h5 id="mean_action">Is the mean a good action?</h5>
+      More granular denoising (more steps) leads to more spread in trajectories, but the VLA still offers the mean trajectory as a valid 
+      trajectory (given the right noise draw). 
+      <br>
+      This begs the question: <em>is the mean trajectory in fact a good trajectory such that the VLA's "unimodal fan" is justified?</em> 
+      <br><br>
+      If the fan were centered on a good action, executing the chunk nearest its center should be good. To test this without touching any weights,
+      I designed and benchmarked a custom inference-time strategy,
+      <a href="https://github.com/arnavinator/Isaac-GR00T/tree/main/scripts/denoising_lab/eval/strategies/consensus_noise_mode_selection" target="_blank"><em>consensus noise-mode selection</em></a>: it samples several noise vectors per query,
+      denoises them in parallel, and executes the chunk closest to their consensus.
+      <div class="row gx-4 mt-3 justify-content-center">
+        <div class="col-lg-6">
+          <table class="table table-bordered table-sm" style="font-size: 0.9em;">
+            <tr style="background-color: #f2f2f2;">
+              <th>Denoising strategy</th>
+              <th>Success, seeds 100–129 × 3 runs each</th>
+            </tr>
+            <tr>
+              <td>Baseline: one noise sample, 4 Euler steps</td>
+              <td>48.9%</td>
+            </tr>
+            <tr>
+              <td>Chunk closest to the mean, 1 Euler step</td>
+              <td>46.7%</td>
+            </tr>
+            <tr>
+              <td>Chunk closest to the mean, 4 Euler steps</td>
+              <td>35.8%</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <ul>
+        <li><strong>Executing the consensus hurts:</strong> on seeds 100–129, success falls from 48.9% to 46.7% with 1-step candidates,
+          and to 35.8% with 4-step candidates.</li>
+        <li><strong>The fan's mean is usually <em>not</em> a good action</strong>, so the problem is the shape of the fan itself.</li>
+        <li><strong>A better fan</strong> is either <em>multimodal</em> (several valid strategies) or a <em>tight unimodal fan</em>
+          around a good action.</li>
+      </ul>
+
+      <h5 id="diagnosis_to_jitter_grpo">From Diagnosis to Jitter-GRPO</h5>
+      That set the mission: reshape the fan by LoRA fine-tuning the DiT with online RL.
+      <ul>
+        <li><strong>GRPO</strong> gives stable, PPO-style clipped updates. Advantages come from comparing rollouts within a group, so no value
+          function is needed.</li>
+        <li><strong>Jitter</strong> trains on neighboring noise too: each update also feeds the DiT small jitters of the sampled noise.
+          The hypothesis is that this carves stronger basins, pulling nearby noise toward good chunks and pushing it away from bad ones,
+          so <u>a random noise sample lands on a good action more often.</u></li>
+      </ul>
+      <br>
+    </section>
+
+    <section id="theory">
+      <hr>
+      <h2>Jitter-GRPO Theory and Implementation</h2>
+
+      Throughout, $\varepsilon$ is the exact noise the server drew for a chunk during the rollout, and $a$ is the raw output the 4-step sampler
+      produced from that same $\varepsilon$. Jitter-GRPO fine-tunes the DiT with GRPO so that, when $a$ succeeded, slightly perturbed noise
+      $\varepsilon'$ also leads to $a$.
+      <br><br>
+
+      <h5 id="fm_surrogate">Flow Matching (FM) Surrogate Log-Probability</h5>
+      GRPO's clipped objective needs the likelihood ratio $\rho = \pi_\theta(a \mid o) / \pi_{\text{ref}}(a \mid o)$, where $\pi_{\text{ref}}$ is the
+      policy that collected the rollouts. An LLM reads this off its softmax, but GR00T's sampler is a deterministic ODE from $\varepsilon$ to $a$ with
+      no tractable density. Following FPO <a href="https://arxiv.org/abs/2507.21053" target="_blank">[McAllister et al., 2025]</a>, Jitter-GRPO uses
+      the flow-matching (FM) loss as a log-probability surrogate, evaluated along the chunk's own path at $K = 6$ flow times $\tau_k$:
+      $$\log \pi_\theta(a \mid o) \approx -\mathrm{MSE}_\theta = -\frac{1}{K} \sum_{k=1}^{K} \big\| v_\theta(x_{\tau_k} \mid \tau_k, o) - (a - \varepsilon) \big\|^2,
+        \qquad x_\tau = (1 - \tau)\,\varepsilon + \tau a$$
+      where $\|\cdot\|^2$ averages over the $D$ valid action elements.
+      <ul>
+        <li><strong>Intuition:</strong> $v_\theta$ is trained to carry noise to actions along straight ($\tau$-length) paths. If it predicts this chunk's velocity
+          $a - \varepsilon$ well, $a$ fits what the model learned, so $a$ is likely in a high-density region of the model's implied distribution, captured by a low MSE. 
+        </li>
+        <li><strong>Why MSE?</strong> A squared error is a negative Gaussian log-likelihood, which is why $-\mathrm{MSE}$ stands in for $\log \pi$: 
+          $$p(x) \propto \exp\!\left(-\frac{\|x - \mu\|^2}{2\sigma^2}\right) \implies \ln p(x) = -\frac{\|x - \mu\|^2}{2\sigma^2} + \text{const}$$
+        </li>
+      </ul>
+      Expanded, the ratio compares the current field with the rollout policy's field on the same inputs, and only the current field carries gradient:
+      $$\rho = \exp\left(\frac{1}{K} \sum_{k=1}^{K} \Big[\underbrace{-\big\| v_\theta(x_{\tau_k} \mid \tau_k, o) - v_{\text{target}} \big\|^2}_{\text{gradient flows here}}
+        + \underbrace{\big\| v_{\text{ref}}(x_{\tau_k} \mid \tau_k, o) - v_{\text{target}} \big\|^2}_{\text{no gradient (detached)}}\Big]\right),
+        \qquad v_{\text{target}} = a - \varepsilon$$
+      where $v_{\text{ref}}$ is the rollout policy's field, computed once before the update.
+      <br><br>
+      With the surrogate, the ratio is a difference of MSEs, $\ln \rho_i \approx \mathrm{MSE}_{\text{ref},i} - \mathrm{MSE}_{\theta,i}$. The surrogate's
+      unknown constant cancels, so $\rho$ measures only how the update changed $v_\theta$. Note that while $\mathrm{MSE}_{\text{ref},i}$ and $\mathrm{MSE}_{\theta,i}$ are not
+      exact measures of log likelihoods themselves, since these constants cancel when subtracted, their difference is a good proxy for the ratio.
+      <br>
+      <br>
+      Note that this FM surrogate fits LoRA on GR00T better than the alternatives:
+      <table class="table table-bordered table-sm mt-2" style="font-size: 0.9em;">
+        <tr style="background-color: #f2f2f2;">
+          <th>Alternative</th>
+          <th>Problem on GR00T</th>
+        </tr>
+        <tr>
+          <td>Exact likelihood (change of variables)</td>
+          <td><strong>~25,600 DiT backward passes per chunk</strong>, to measure how the sampler stretches each of the 6400 noise values (50 × 128) at each
+            of the 4 steps</td>
+        </tr>
+        <tr>
+          <td>Hutchinson trace estimate</td>
+          <td><strong>~12 DiT forward passes per chunk.</strong> Almost every chunk must first be run in reverse through the new sampler to recover its noise,
+            and the estimate is noisy</td>
+        </tr>
+        <tr>
+          <td>Denoising steps as an MDP (<a href="https://arxiv.org/abs/2305.13301" target="_blank">DDPO</a>,
+            <a href="https://arxiv.org/abs/2409.00588" target="_blank">DPPO</a>)</td>
+          <td><strong>No gradient.</strong> GR00T's denoising steps are deterministic, so each step's likelihood is all-or-nothing</td>
+        </tr>
+        <tr>
+          <td>Noise injected into the sampler (<a href="https://arxiv.org/abs/2505.05470" target="_blank">Flow-GRPO</a>,
+            <a href="https://arxiv.org/abs/2505.22094" target="_blank">ReinFlow</a>,
+            <a href="https://arxiv.org/abs/2510.25889" target="_blank">π<sub>RL</sub></a>)</td>
+          <td><strong>Changes the deployed sampler.</strong> Every denoising step gets extra random noise, which alters the executed actions and adds a
+            noise level to tune (or a network to learn it)</td>
+        </tr>
+        <tr>
+          <td><strong>FM surrogate (used here)</strong></td>
+          <td><strong>No problem.</strong> 6 DiT forward passes per chunk (one per $\tau_k$), under any weights; the sampler is unchanged</td>
+        </tr>
+      </table>
+      <br><br>
+
+      <h5 id="grpo_robot">Applying the FM Surrogate to GRPO on Robot Trajectories</h5>
+      GRPO <a href="https://arxiv.org/abs/2402.03300" target="_blank">[Shao et al., 2024]</a> replaces PPO's value network with a group baseline: it
+      samples several answers to one question and scores each answer against its group. This assumes <em>terminal</em> rewards: an answer is graded
+      once, and every token shares the grade. Robot rewards are not terminal, since each state sets up the rewards that follow, which is why PPO learns
+      a value function $V(s_t)$ to score every step. 
+      <br>
+      Jitter-GRPO stays value-free by making a whole trajectory the "answer" and distributing rewards/advantage equally throughout a trajectory:
+      <table class="table table-bordered table-sm mt-2" style="font-size: 0.9em;">
+        <tr style="background-color: #f2f2f2;">
+          <th></th>
+          <th>GRPO for LLMs</th>
+          <th>Jitter-GRPO</th>
+        </tr>
+        <tr>
+          <td><strong>Question</strong></td>
+          <td>A prompt</td>
+          <td>One initial state (a RoboCasa kitchen)</td>
+        </tr>
+        <tr>
+          <td><strong>Answer</strong></td>
+          <td>A response, sampled $G$ times from the same question</td>
+          <td>A full episode rollout (many action chunks), sampled $G$ times from the same initial state</td>
+        </tr>
+        <tr>
+          <td><strong>Reward</strong></td>
+          <td>Terminal score of the response</td>
+          <td>Sparse (terminal) binary success at the end of the episode, $r \in \{0, 1\}$</td>
+        </tr>
+        <tr>
+          <td><strong>Credit</strong></td>
+          <td>The response's advantage, broadcast to every token in the response</td>
+          <td>The episode's advantage, broadcast to every action chunk in the rollout</td>
+        </tr>
+      </table>
+
+      Jitter-GRPO computes the advantage above with a fixed scale in place of the group std, $A_i = (r_i - \bar{r}_g) / 0.5$ (instead of dividing by group standard deviation like traditional GRPO, see <a href="#advantage_norm">Advantage
+      Normalization</a>), and splits it evenly over the rollout's $T_i$ trained chunks, $\hat{A}_{i,t} = A_i / T_i$, so every rollout carries the same
+      total weight regardless of length.
+      <br>
+      The loss is the clipped objective with a per-row lower clip:
+      $$\mathcal{L}(\theta) = \mathbb{E}_{i,t}\Big[-\min\big(\rho\,\hat{A},\ \mathrm{clip}(\rho,\ \rho_{\text{floor}},\ 1 + \epsilon_{\text{high}})\,\hat{A}\big)\Big],
+        \qquad \rho = e^{\,\mathrm{MSE}_{\text{ref}} - \mathrm{MSE}_\theta}$$
+      with $\epsilon_{\text{high}} = 0.2$ and $\rho_{\text{floor}}$ set per row (see <a href="#relative_clip">Relative Lower Clip</a>).
+      <br><br>
+      Only the LoRA weights in $v_\theta$ receive gradients. For an unclipped row, the loss $\ell = -\hat{A}\rho$ has gradient
+      $\nabla_\theta \ell = \hat{A}\,\rho\,\nabla_\theta \mathrm{MSE}_\theta$:
+      <ul>
+        <li><strong>Successes</strong> ($\hat{A} \gt 0$) descend their FM loss, pulling $v_\theta$ toward their chunk: <em>reinforcement</em>.</li>
+        <li><strong>Failures</strong> ($\hat{A} \lt 0$) ascend it, pushing $v_\theta$ away from their chunk: <em>erosion</em>. Once
+          $\rho \lt \rho_{\text{floor}}$, the clip zeroes the row's gradient.</li>
+      </ul>
+      <br><br>
+
+      <h5 id="jitter_jacobian">Jitter as a Jacobian Regularizer</h5>
+      Success rows are trained from jittered noise, with the velocity target moved to match. At each $\tau_k$, for each $\varepsilon$, we find a variance-preserving
+      neighboring noise whose proximity is controlled by $\lambda$:
+      $$\varepsilon' = \sqrt{1 - \lambda^2}\,\varepsilon + \lambda\,\xi, \qquad \xi \sim \mathcal{N}(0, I)$$
+      The jitter is variance-preserving, so $\varepsilon'$ is still a standard normal draw. 
+      <br><br>
+      <strong>What a jittered row asks.</strong> From an input $x$ at flow time $\tau$, one Euler step over the remaining time $1 - \tau$ jumps
+      straight to the DiT's predicted clean chunk (on the chunk's own path, an exact field $v_\theta = a - \varepsilon$ lands exactly on $a$):
+      $$\hat{a}_\theta(x) = x + (1 - \tau)\, v_\theta(x \mid \tau, o)$$
+      Evaluate it at the jittered input $x'_\tau = (1 - \tau)\,\varepsilon' + \tau a$, which is $x_\tau$ built from $\varepsilon'$. Substituting
+      $x'_\tau$ and using $\tau a - a = -(1 - \tau)\,a$:
+      $$\begin{aligned}
+        \hat{a}_\theta(x'_\tau) - a &amp;= (1 - \tau)\,\varepsilon' + \tau a + (1 - \tau)\, v_\theta(x'_\tau \mid \tau, o) - a \\
+        &amp;= (1 - \tau)\big[v_\theta(x'_\tau \mid \tau, o) - (a - \varepsilon')\big]
+      \end{aligned}$$
+      The bracket is the jittered row's FM residual against the moved target $a - \varepsilon'$, so its loss is
+      $$\mathrm{MSE}_\theta(\varepsilon') = \big\| v_\theta(x'_\tau \mid \tau, o) - (a - \varepsilon') \big\|^2 = \frac{\|\hat{a}_\theta(x'_\tau) - a\|^2}{(1 - \tau)^2}$$
+      Minimizing it makes the one-step prediction from the jittered input land on $a$: <em>from noise near $\varepsilon$, land on $a$</em>.
+      <br><br>
+      <strong>The Jacobian.</strong> The Jacobian of a map is the matrix of all its partial derivatives, with one row per output value and one
+      column per input value, so a map from $n$ inputs to $m$ outputs has an $m \times n$ Jacobian. For the sampler that turns noise into an action,
+      $J = \partial a / \partial \varepsilon$ is square, $6400 \times 6400$ (GR00T's raw $50 \times 128$ action tensor in and out, of which
+      $16 \times 12$ values are real PandaOmron actions). Entry $(i, j)$ says how much action value $i$ moves when noise value $j$ is nudged, so $J$ is
+      the sampler's local stretching factor. Its determinant, which exists only for square matrices, measures how the sampler stretches volume and sets
+      the exact density by the change of variables:
+      $$p(a) = \frac{p(\varepsilon)}{|\det J|} \quad\Longrightarrow\quad \log p(a) = \log p(\varepsilon) - \log|\det J|$$
+      $p(\varepsilon)$ is a known Gaussian, but $\log|\det J|$ costs the ~25,600 backward passes ruled out in the table above.
+      <br><br>
+      Jitter-GRPO instead penalizes a cheaper summary of a Jacobian $J$, its <strong>squared Frobenius norm</strong> $\|J\|_F^2$. It equals the trace of $J^\top J$, since the $j$-th diagonal entry of $J^\top J$ is column
+      $j$ dotted with itself:
+      $$\|J\|_F^2 = \sum_{i,j} J_{ij}^2 = \sum_j (J^\top J)_{jj} = \mathrm{tr}(J^\top J)$$
+      This holds for a Jacobian of any shape: for an $m \times n$ matrix $J$, $J^\top J$ is square ($n \times n$), so its trace is always defined
+      even when $J$ itself is not square.
+      It is the total squared stretch, or how far the output moves on average when every input value is nudged by independent unit noise. A small
+      norm means nearby noise lands nearby (a wide basin); a large one means nearby noise scatters (a wide fan).
+      <br><br>
+      <strong>How jitter penalizes the Jacobian's squared Frobenius norm.</strong> Four steps:
+      <ol>
+        <li><strong>Input shift.</strong> The jitter moves the input by
+          $x'_\tau - x_\tau = (1 - \tau)(\varepsilon' - \varepsilon) \approx (1 - \tau)\,\lambda\,\xi$, since $\sqrt{1 - \lambda^2} \approx 1$.</li>
+        <li><strong>Output shift.</strong> Differentiating $\hat{a}_\theta(x) = x + (1 - \tau)\,v_\theta(x \mid \tau, o)$ gives the one-step
+          prediction's Jacobian, which depends on where it is evaluated:
+          $$J(x) = \frac{\partial \hat{a}_\theta(x)}{\partial x} = I + (1 - \tau)\,\frac{\partial v_\theta(x)}{\partial x}$$
+          Doing a first-order Taylor expansion around $x_\tau$:
+          $$\hat{a}_\theta(x'_\tau) \approx \hat{a}_\theta(x_\tau) + J(x_\tau)\,(x'_\tau - x_\tau) = \hat{a}_\theta(x_\tau) + (1 - \tau)\,\lambda\,J(x_\tau)\,\xi$$
+          Subtracting $a$ from both sides splits the landing error into the clean-noise error plus a jitter term:
+          $$\hat{a}_\theta(x'_\tau) - a \approx \big[\hat{a}_\theta(x_\tau) - a\big] + (1 - \tau)\,\lambda\,J(x_\tau)\,\xi$$</li>
+        <li><strong>Average over $\xi$.</strong> We now take the expected value over $\xi$ of the squared landing error:
+          $\mathbb{E}_\xi\big[\|\hat{a}_\theta(x'_\tau) - a\|^2\big]$. 
+          <br>
+          First square both sides of step 2, writing $\|u\|^2 = u^\top u / D$ (mean of squared components of $u$):
+          $$\begin{aligned}
+            \big\|\hat{a}_\theta(x'_\tau) - a\big\|^2 &amp;\approx \big\|\hat{a}_\theta(x_\tau) - a\big\|^2 \\
+            &amp;\quad + \frac{2(1 - \tau)\lambda}{D}\,\big(\hat{a}_\theta(x_\tau) - a\big)^\top J(x_\tau)\,\xi \\
+            &amp;\quad + (1 - \tau)^2 \lambda^2\, \big\|J(x_\tau)\,\xi\big\|^2
+          \end{aligned}$$
+          Then take $\mathbb{E}_\xi[\cdot]$ of each term:
+          <ul>
+            <li><em>First term.</em> It is evaluated at the clean input $x_\tau$ and contains no $\xi$, so averaging leaves it unchanged:
+              $$\mathbb{E}_\xi\big[\|\hat{a}_\theta(x_\tau) - a\|^2\big] = \|\hat{a}_\theta(x_\tau) - a\|^2$$</li>
+            <li><em>Cross term.</em> Everything in it except $\xi$ is evaluated at the clean input $x_\tau$, which does not depend on $\xi$. That part
+              is a fixed vector, so it comes out of the average, leaving only the mean of the jitter:
+              $$\mathbb{E}_\xi\Big[\big(\hat{a}_\theta(x_\tau) - a\big)^\top J(x_\tau)\,\xi\Big]
+                = \underbrace{\big(\hat{a}_\theta(x_\tau) - a\big)^\top J(x_\tau)}_{\text{fixed vector, no } \xi}\ \underbrace{\mathbb{E}_\xi[\xi]}_{=\,0} = 0$$
+              Intuitively, $\xi$ and $-\xi$ are equally likely and flip the cross term's sign, so they cancel on average.</li>
+            <li><em>Last term.</em> By the trace identity $\mathbb{E}[\xi^\top A\, \xi] = \mathrm{tr}(A\, \mathbb{E}[\xi\xi^\top])$ with
+              $\mathbb{E}[\xi\xi^\top] = I$, and $\mathrm{tr}(J^\top J) = \|J\|_F^2$ from above, it averages to the squared Frobenius norm:
+              $$\mathbb{E}_\xi\big[\|J(x_\tau)\,\xi\|^2\big] = \frac{1}{D}\,\mathbb{E}_\xi\big[\xi^\top J(x_\tau)^\top J(x_\tau)\,\xi\big]
+                = \frac{1}{D}\,\mathrm{tr}\big(J(x_\tau)^\top J(x_\tau)\big) = \frac{\|J(x_\tau)\|_F^2}{D}$$</li>
+          </ul>
+          So
+          $$\mathbb{E}_\xi\big[\|\hat{a}_\theta(x'_\tau) - a\|^2\big] \approx \big\|\hat{a}_\theta(x_\tau) - a\big\|^2 + (1 - \tau)^2 \lambda^2\, \frac{\|J(x_\tau)\|_F^2}{D}$$
+          Here $D$ is the number of action values the MSE averages over: the $16 \times 12 = 192$ real PandaOmron values ($8 \times 12 = 96$ when only
+          the executed steps are scored, as in the runs), and $\|J(x_\tau)\|_F^2$ sums over their rows (a $D \times 6400$ block of $J(x_\tau)$).</li>
+        <li><strong>Back to the loss.</strong> Dividing by $(1 - \tau)^2$ turns the landing error back into the FM loss, and the first term is
+          $\mathrm{MSE}_\theta(\varepsilon)$ by the same identity at $\lambda = 0$. For a well-fit chunk:</li>
+      </ol>
+      $$\mathbb{E}_\xi\big[\mathrm{MSE}_\theta(\varepsilon')\big] \approx \underbrace{\mathrm{MSE}_\theta(\varepsilon)}_{\text{fit } a \text{ from } \varepsilon}
+        + \frac{\lambda^2}{D}\,\underbrace{\|J(x_\tau)\|_F^2}_{\text{endpoint sensitivity}}$$
+      <ul>
+        <li><strong>A Jacobian penalty for free:</strong> a success row now also penalizes how far the predicted landing point moves when the noise moves.
+          Sampling $\xi$ estimates the Frobenius norm, as in Hutchinson's trace estimator, so no double backward pass is needed.</li>
+        <li><strong>Where it acts:</strong> since $J(x_\tau) = I + (1 - \tau)\,\partial v_\theta / \partial x$, the penalty is zero when
+          $\partial v_\theta / \partial x = -I / (1 - \tau)$, i.e. when the field fully cancels input noise. Base GR00T is already close to this in most
+          directions, so the penalty concentrates on the few noise directions that still move the landing point: the directions that form the fan.
+          Shrinking them widens the basin around each success.</li>
+        <li><strong>Fresh $\xi$:</strong> it is redrawn on every forward pass (each epoch, minibatch, and $\tau_k$), so there is no fixed perturbation
+          to memorize.</li>
+      </ul>
+      Configuration:
+      <ul>
+        <li><code>jitter_pos</code> $= \lambda$ on success rows: 0.125 to 0.4 in the experiments conducted. That jitters the noise by $\lambda^2$ = 1.6% to
+          16% (the share of $\varepsilon'$'s variance that is fresh noise $\xi$), leaving $\varepsilon'$ correlated with $\varepsilon$ by
+          $\sqrt{1 - \lambda^2}$ = 99% to 92%.</li>
+        <li><code>jitter_neg</code> $= 0$ on failure rows. A failure row <em>raises</em> its FM loss, so jittering it would also raise the endpoint
+          Jacobian around the failure. That objective has no upper bound (unbounded erosion), and raising it undoes the field's noise cancellation,
+          so noise would leak into the actions. Without jitter, failures are pushed away only at their exact $\varepsilon$.</li>
+      </ul>
+
+      <figure style="margin: 20px 0; text-align: center;">
+        <pre class="diagram">
+ fixed before the update:  o, ε, a, Â, MSE_ref<span class="note">   (no gradient)</span>
+   │
+   ▼
+ ε' = sqrt(1-λ²)·ε + λ·ξ       <span class="note">ξ ~ N(0, I), redrawn every forward pass</span>
+   │                           <span class="note">λ = jitter_pos on successes, 0 on failures</span>
+   ▼
+ x' = (1-τ)·ε' + τ·a           <span class="note">τ = one of the K = 6 values τ_k</span>
+   │
+   ▼
+<span class="lora"> v_θ(x' | τ, o)   DiT + LoRA  ◄─────────────────────┐</span>
+   │                                                <span class="lora">│</span>
+   ▼                                                <span class="lora">│</span>
+ MSE_θ = |v_θ - (a - ε')|²                          <span class="lora">│</span><span class="note"> backprop:</span>
+   │                                                <span class="lora">│</span><span class="note"> only the LoRA</span>
+   ▼                                                <span class="lora">│</span><span class="note"> weights train</span>
+ ρ = exp(MSE_ref - MSE_θ)                           <span class="lora">│</span>
+   │                                                <span class="lora">│</span>
+   ▼                                                <span class="lora">│</span>
+ loss = -min(ρ·Â, clip(ρ, ρ_floor, 1.2)·Â)  <span class="lora">────────┘</span></pre>
+        <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+          <em>Fig. 10: One Jitter-GRPO training row (green: the gradient path into the LoRA weights)</em>
+        </figcaption>
+      </figure>
+      <br><br>
+
+      <h5 id="awr_on_success">Optional Reinforcing Successes (AWR-on-Success)</h5>
+      The FM surrogate's likelihood is biased: it can lower a chunk's likelihood freely but can barely raise it. Since
+      $\ln \pi \approx -\mathrm{MSE}$, the ratio is a difference of MSEs, and $\mathrm{MSE}_\theta$ can only range over $[0, \infty)$:
+      $$\ln \rho = \ln \pi_\theta - \ln \pi_{\text{ref}} = \mathrm{MSE}_{\text{ref}} - \mathrm{MSE}_\theta
+        \quad\Longrightarrow\quad \ln \rho \in (-\infty,\ \mathrm{MSE}_{\text{ref}}], \qquad \rho \in (0,\ e^{\mathrm{MSE}_{\text{ref}}}]$$
+      $\mathrm{MSE}_{\text{ref}}$ is the error of the very policy that generated the chunk. For chunks it already handles well (the ones which lead to successful
+      trajectories and we would like to assign high advantage to), $\mathrm{MSE}_{\text{ref}}$
+      is small, so the cap is tight (often $e^{\mathrm{MSE}_{\text{ref}}} \approx 1.002$). This means that a success's ratio can barely rise, while a failure's can fall
+      until the clip stops it.
+      <br><br>
+      <code>positive_advantage_weight_scaling</code> compensates for the FM surrogate's inability to significantly raise a success's ratio.
+      Only for positive advantage chunks, the Jitter-GRPO codebase allows for more heavily weighting positive advantage chunks by $k$ below:
+      $$k = \mathrm{clip}\Big(\kappa\,\frac{M_-}{M_+},\ 1,\ k_{\max}\Big)$$
+      where $M_-$ and $M_+$ are the summed losses of the failure and success rows still passing gradient. So $k$ targets a reinforcement mass of
+      $\kappa$ (<code>positive_advantage_weight_target_ratio</code>) times the erosion mass, capped at $k_{\max}$
+      (<code>positive_advantage_weight_max</code>). 
+      <br>
+      Since jitter rides on success rows, $k$ scales the Jacobian penalty too. 
+      <br>
+      This feature is off in the proof of concept, and included (and A/B tested) in full training ($\kappa = 1.5$, $k_{\max} = 5$).
+      <br><br><br>
+
+      <h5 id="relative_clip">Relative Lower Clip</h5>
+      The same difference of MSEs, $\ln \rho_i = \mathrm{MSE}_{\text{ref},i} - \mathrm{MSE}_{\theta,i}$, shapes the clip.
+      <br><br>
+      <strong>Having a uniform lower clip is uneven.</strong> On the erosion side, a flat clip stops a failure row's gradient once its ratio drops
+      below $1 - \epsilon_{\text{low}}$. At $\epsilon_{\text{low}} = 0.08$:
+      $$\rho_i \lt 0.92 \iff \mathrm{MSE}_{\text{ref},i} - \mathrm{MSE}_{\theta,i} \lt \ln(0.92) = -0.08338 \iff
+        \mathrm{MSE}_{\theta,i} \gt \mathrm{MSE}_{\text{ref},i} + 0.08338$$
+      Every row gets the same <em>absolute</em> allowance. Relative to how well the row was already fit, that allowance is
+      $$\frac{\mathrm{MSE}_{\text{ref},i} + 0.08338}{\mathrm{MSE}_{\text{ref},i}}$$
+      which depends heavily on $\mathrm{MSE}_{\text{ref},i}$, and $\mathrm{MSE}_{\text{ref},i}$ varies widely: in iteration 1 alone, its 10th percentile
+      (0.00032) and maximum (0.0783) are 245× apart within one buffer.
+      <ul>
+        <li><strong>10th percentile</strong> of $\mathrm{MSE}_{\text{ref}}$ (a chunk the reference policy fits better than 90% of the buffer):
+          $(0.00032 + 0.08338) / 0.00032 \approx 261.6\times$</li>
+        <li><strong>Maximum</strong> (the single chunk it fits worst): $(0.0783 + 0.08338) / 0.0783 \approx 2.06\times$</li>
+      </ul>
+      So a well-fit chunk gets ~127× more room to erode before the clip stops its gradient than a poorly-fit one. A uniform <em>relative</em> budget
+      fixes this: <code>clip_low_mse_coef</code> $= c$ gives each row its own floor, with $\epsilon_{\text{low}}$ kept as an absolute ceiling:
+      $$\rho_{\text{floor},i} = \exp\!\big(-\min(c \cdot \mathrm{MSE}_{\text{ref},i},\ |\ln(1 - \epsilon_{\text{low}})|)\big)$$
+      A failure's MSE may then grow by at most a factor of $1 + c$. The experiments use $c = 1$ (at most double) and $\epsilon_{\text{low}} = 0.005$:
+      <div class="row gx-4 mt-3 justify-content-center">
+        <div class="col-lg-9">
+          <table class="table table-bordered table-sm" style="font-size: 0.9em;">
+            <tr style="background-color: #f2f2f2;">
+              <th>Chunk in iteration 1's buffer</th>
+              <th>$\mathrm{MSE}_{\text{ref}}$</th>
+              <th>Allowed $\mathrm{MSE}_\theta / \mathrm{MSE}_{\text{ref}}$, flat clip ($\epsilon_{\text{low}} = 0.08$)</th>
+              <th>Allowed $\mathrm{MSE}_\theta / \mathrm{MSE}_{\text{ref}}$, relative clip ($c = 1$)</th>
+            </tr>
+            <tr>
+              <td>10th percentile (well fit)</td>
+              <td>0.00032</td>
+              <td>262×</td>
+              <td>2×</td>
+            </tr>
+            <tr>
+              <td>Maximum (fit worst)</td>
+              <td>0.0783</td>
+              <td>2.06×</td>
+              <td>1.06× (ceiling binds)</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <br><br>
+
+      <h5 id="advantage_norm">Advantage Normalization</h5>
+      <ul>
+        <li><code>group_advantage_fixed_std</code>: divide by a fixed 0.5 (the largest std of a 0/1 reward) instead of the group's own std. The group
+          std inflates nearly-solved and nearly-failed groups: a lone failure in an 11/12 group would get −3.18, against −0.96 in a 6/12 group
+          (−1.83 vs. −1.00 with the fixed scale). Dr. GRPO <a href="https://arxiv.org/abs/2503.20783" target="_blank">[Liu et al., 2025]</a> drops the
+          std term for the same difficulty bias.</li>
+        <li><code>per_iteration_advantage_norm</code>: z-score chunk advantages once per iteration, not per minibatch. Each group's advantages sum to
+          zero, so the iteration mean is ≈ 0 and every sign survives; a per-minibatch mean, skewed by the balanced sampler, can flip a success negative.</li>
+        <li><code>include_anchor_groups</code>, <code>anchor_advantage</code> = 0.3: an all-success group has zero advantage and would be dropped by GRPO.
+          Anchoring gives its chunks a small constant positive advantage (without jitter), so the update keeps reinforcing scenes it already solves.
+          All-fail groups stay dropped, since pushing down every rollout gives no direction to move toward.</li>
+      </ul>
+      <br><br>
+
+      <h5 id="implementation_details">Additional Implementation Details</h5>
+      <table class="table table-bordered table-sm mt-2" style="font-size: 0.9em;">
+        <tr style="background-color: #f2f2f2;">
+          <th></th>
+          <th>Flag</th>
+          <th>Setting</th>
+          <th>Purpose</th>
+        </tr>
+        <tr>
+          <td rowspan="3" style="vertical-align: top;"><strong>Group construction</strong></td>
+          <td><code>group_size</code></td>
+          <td>12</td>
+          <td>Episodes per group. All episodes in a group are bit-identical copies of one initial state.</td>
+        </tr>
+        <tr>
+          <td><code>num_groups</code></td>
+          <td>4</td>
+          <td>Groups per iteration for on-policy data collection.</td>
+        </tr>
+        <tr>
+          <td><code>scene_seed_pool_size</code>, <code>scene_seed_pool_base</code></td>
+          <td>4, 100067</td>
+          <td>Number of kitchen seeds to rotate through (only num_groups are chosen per iteration). The starting seed is user-provided, and the remaining seeds in the pool are incremented from the base.</td>
+        </tr>
+        <tr>
+          <td rowspan="3" style="vertical-align: top;"><strong>Rollout</strong></td>
+          <td><code>max_episode_steps</code></td>
+          <td>480</td>
+          <td>Step budget per episode (up to 60 chunks for 8 steps/chunk) until episode forcefully terminates (failure).</td>
+        </tr>
+        <tr>
+          <td><code>n_action_steps</code></td>
+          <td>8</td>
+          <td>Execute 8 of the 16 predicted steps, then re-plan.</td>
+        </tr>
+        <tr>
+          <td><code>post_reopen_keep_chunks</code></td>
+          <td>1–2</td>
+          <td>For episodes declared a failure, keep only 1–2 chunks after gripper reopen (if detected). The arm meanders after a failed grasp; this post-processing allows for higher signal-to-noise ratio when training.</td>
+        </tr>
+        <tr>
+          <td rowspan="4" style="vertical-align: top;"><strong>Minibatch construction</strong></td>
+          <td><code>mask_loss_with_n_action_steps</code></td>
+          <td>on</td>
+          <td>The surrogate scores only the 8 executed steps (instead of scoring all 16 steps in a chunk).</td>
+        </tr>
+        <tr>
+          <td><code>tau_centers</code></td>
+          <td>0, 0.25, 0.35, 0.5, 0.6, 0.75</td>
+          <td>Flow times $\tau_k$ for the surrogate, each with a small random offset (std 0.02). Pre-training favored early $\tau$ (only 35% of
+            its draws reach $\tau \ge 0.5$); these cover all four inference steps and put half the evaluations at $\tau \ge 0.5$, since I showed earlier how later Euler
+            steps add the fan's spread (Figs. 6–8).</td>
+        </tr>
+        <tr>
+          <td><code>balanced_minibatch_positive_adv_ratio</code>, <code>_dynamic</code>, <code>_max</code></td>
+          <td>0.5, on, 0.75–0.9</td>
+          <td>Each minibatch's success share tracks the natural share, clamped to [0.5, max]: rare successes get oversampled, rare failures do not. 
+            <br>
+            Given that we don't have a normalized probability distribution (Gaussian/softmax) that we are explicitly reweighting,
+            an isolated negative update just <u>degrades the field locally with no guaranteed attractor</u>. 
+            For stable training, we need a good action's path in the same minibatch to absorb the rerouted volume, such that <u>every minibatch has directional balance without losing data.</u></td>
+        </tr>
+        <tr>
+          <td><code>mini_batch_size</code> × <code>gradient_accumulation_steps</code></td>
+          <td>8 × 16</td>
+          <td>Effective minibatch size is 128 chunks per optimizer step (learning rate 5e-5, 3 epochs per iteration). Gradient accumulation was implemented due to insufficient VRAM size on my AWS EC2 instance (NVIDIA A10G, 24 GB VRAM).</td>
+        </tr>
+      </table>
+      <br><br>
+
+      <h5 id="related_work">Related Work</h5>
+      Jitter-GRPO starts from FPO's FM surrogate <a href="https://arxiv.org/abs/2507.21053" target="_blank">[McAllister et al., 2025]</a> and adds
+      three wins:
+      <ul>
+        <li><strong>A Jacobian regularizer that falls out of jitter.</strong> <a href="#jitter_jacobian">Jittering a success's input noise</a> adds an
+          endpoint-Jacobian penalty in expectation, which <a href="#motivation">narrows the fan</a> around each successful chunk at no extra compute:
+          no double backward pass, no extra network, and <a href="#fm_surrogate">no sampler change</a>.</li>
+        <li><strong>A stabilized FM surrogate.</strong> The surrogate is lopsided: since $\mathrm{MSE}_\theta \ge 0$, a success's ratio can rise
+          only to $e^{\mathrm{MSE}_{\text{ref}}} \approx 1.002$, a failure's can fall freely, and without a normalized distribution an isolated push on a
+          failure only degrades the field. Jitter-GRPO counters all three: <a href="#awr_on_success">AWR-on-success</a> up-weights successes to make up
+          for their small ratio gain, the <a href="#relative_clip">relative lower clip</a> budgets erosion by each chunk's own fit, and
+          <a href="#implementation_details">dynamic balanced minibatches</a> pair every erosion step with successes to absorb it.</li>
+        <li><strong>Online RL for a 3.3B flow-matching VLA on one GPU.</strong> Whole episodes act as GRPO answers with value-free credit, failure
+          tails are trimmed at the gripper's reopen, and LoRA trains 0.44% of GR00T's weights on a single 24 GB A10G.</li>
+      </ul>
+      Side by side with the closest prior work, only Jitter-GRPO checks every column:
+      <table class="table table-bordered table-sm mt-2" style="font-size: 0.9em; text-align: center;">
+        <tr style="background-color: #f2f2f2;">
+          <th style="text-align: left;">Method</th>
+          <th>RL on a flow model</th>
+          <th>Jacobian penalty</th>
+          <th>Rollout sampler unchanged</th>
+          <th>Fixes the surrogate's success/failure imbalance</th>
+        </tr>
+        <tr>
+          <td style="text-align: left;"><a href="https://doi.org/10.1162/neco.1995.7.1.108" target="_blank">Bishop, 1995</a>;
+            <a href="https://arxiv.org/abs/1908.02729" target="_blank">Hoffman et al., 2019</a></td>
+          <td><span style="color: #c20f0f;">✗</span> (supervised)</td>
+          <td><span style="color: #198754;">✓</span></td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td style="text-align: left;"><a href="https://arxiv.org/abs/2505.05470" target="_blank">Flow-GRPO</a>,
+            <a href="https://arxiv.org/abs/2505.22094" target="_blank">ReinFlow</a>,
+            <a href="https://arxiv.org/abs/2510.25889" target="_blank">π<sub>RL</sub></a></td>
+          <td><span style="color: #198754;">✓</span></td>
+          <td><span style="color: #c20f0f;">✗</span></td>
+          <td><span style="color: #c20f0f;">✗</span> (injects noise to explore)</td>
+          <td>— (no FM surrogate)</td>
+        </tr>
+        <tr>
+          <td style="text-align: left;"><a href="https://arxiv.org/abs/2507.21053" target="_blank">FPO</a></td>
+          <td><span style="color: #198754;">✓</span></td>
+          <td><span style="color: #c20f0f;">✗</span></td>
+          <td><span style="color: #198754;">✓</span></td>
+          <td><span style="color: #c20f0f;">✗</span></td>
+        </tr>
+        <tr>
+          <td style="text-align: left;"><a href="https://arxiv.org/abs/2602.02481" target="_blank">FPO++</a></td>
+          <td><span style="color: #198754;">✓</span></td>
+          <td><span style="color: #c20f0f;">✗</span></td>
+          <td><span style="color: #198754;">✓</span></td>
+          <td>Failure side only</td>
+        </tr>
+        <tr>
+          <td style="text-align: left;"><a href="https://arxiv.org/abs/2606.21086" target="_blank">ReFPO</a></td>
+          <td><span style="color: #198754;">✓</span></td>
+          <td>Measured only</td>
+          <td><span style="color: #198754;">✓</span></td>
+          <td><span style="color: #c20f0f;">✗</span></td>
+        </tr>
+        <tr style="font-weight: bold;">
+          <td style="text-align: left;">Jitter-GRPO</td>
+          <td><span style="color: #198754;">✓</span></td>
+          <td><span style="color: #198754;">✓</span></td>
+          <td><span style="color: #198754;">✓</span></td>
+          <td><span style="color: #198754;">✓</span></td>
+        </tr>
+      </table>
+      I found no prior work that jitters a flow policy's input noise inside the RL objective to widen the basins of successful actions.
+      <br><br><br>
+    </section>
+
+    <section id="proof_of_concept">
+      <hr>
+      <h2>Proof of Concept Example (overfit on single scene)</h2>
+
+      For this project, I chose the RoboCasa scene <u>CoffeeServeMug</u>, in which the GR00T VLA commands the PandaOmron embodiment
+      to approach a coffee mug underneath the coffee machine, grasp it carefully, and place the mug in the upright position on the countertop
+      (thereby serving the coffee). NVIDIA reports that the base model (GR00T N1.6) can successfully complete this task 63.5% of the time (measured across 200 samples).
+      <br><br>
+      Before training across many kitchens simulating CoffeeServeMug, the first test is whether Jitter-GRPO can learn at all: overfit one hard state and raise its success
+      rate.
+      <br>
+      To do so, I found and saved a state of a failing CoffeeServeMug trajectory generated by the base GR00T policy. I then picked <em>step 10</em> of this failed rollout, which I 
+      visually concluded to be the state shortly after which the base policy's actions start to become unfavorable (in my opinion). There is nothing inherently bad about step 10, but 
+      the base policy's next series of steps sets it up for failure.
+      <br><br>
+      Measured over 40 independent rollouts, from step 10 the base GR00T model has a <u>~10% chance of successfully completing this CoffeeServeMug scene</u>. We want to see
+      if the Jitter-GRPO framework can raise the success rate. Thus, every rollout in this section starts from this same saved simulator state (step 10 of the base GR00T CoffeeServeMug failing episode). 
+      <br><br>
+
+      <div class="row gx-0 mb-4 mt-4 align-items-center">
+        <div style="width: 30%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 40%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./poc_scene.jpg" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 11: The start state (step 10) and where base GR00T's episode went two chunks later (step 12)</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 30%; padding:0;" class="custom-column">
+        </div>
+      </div>
+
+      <ul>
+        <li><strong>Step 10, the start state:</strong> base GR00T is approaching the mug from a risky angle, with its gripper coming in close to the
+          coffee machine. The wrist camera still sees the mug.</li>
+        <li><strong>Step 12, two chunks later:</strong> base GR00T positions itself such that most of the wrist camera's view is blocked,
+          making grasping/approach much harder.</li>
+      </ul>
+      To succeed, the policy must adjust its approach, then grasp and release the mug despite the obscured view,
+          instead of drifting into states like step 12.
+      <br><br>
+
+      <h5 id="poc_training">Training: 10% → 92% Success</h5>
+      Each iteration rolls out 4 groups of 12 episodes from the start state (all 48 episodes have the same starting point, but are still partitioned into 4 groups
+      for the sake of GRPO's objective... this is okay and adds some "regularization" in advantage calculations).
+      <br>
+      Note that this section tests the jitter mechanism with no confounding, as the <a href="#awr_on_success">optional AWR-on-success</a> is disabled.
+      <br>
+      The plot below shows the success rate of the 48 on-policy rollouts that occur at the start of each iteration. Since on-policy data is collected at
+      the start of each iteration, the success rate reported for iteration $N$ is the result of the model training in iteration $N-1$.
+
+
+      <div class="row gx-0 mb-4 mt-4 align-items-center">
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 66%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./poc_success_rate.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 12: Success rate per iteration from the step-10 state; dashed lines mark the two configuration changes</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+      </div>
+
+      <ul>
+        <li><strong>Nearly 9× the base success rate:</strong> success climbs from 10% to 92% in six updates, then holds at 81–92%. From iteration 6 on,
+          even the weakest group of 12 succeeds at least 75% of the time.</li>
+        <li><strong>More headroom (after iteration 4):</strong> the first run, at <code>jitter_pos</code> = 0.125, plateaued, so I resumed from its
+          iteration-3 checkpoint at <code>jitter_pos</code> = 0.25. Four times the jitter variance (1.6% → 6.25%) gives success rows more room to raise
+          their ratio, and the Jacobian term's gradient grows from ~15% to ~33% of the reinforcement gradient. (The iteration-4 dip is sampling noise:
+          the same checkpoint scored 79% when first sampled.)</li>
+        <li><strong>Stop oversampling failures (after iteration 8):</strong> near 90% success, the balanced sampler's 0.75 cap on each minibatch's
+          success share kept oversampling the few failures. Raising the cap to 0.9 lets minibatches follow the natural share, and training stays
+          stable.</li>
+      </ul>
+      <br>
+
+      <h5 id="poc_approach">Learning a New Approach Angle</h5>
+      To see what changed, I repeated the <a href="#motivation">motivation's</a> 100-seed sweep through base GR00T and the iteration-8 checkpoint
+      (92% success at iteration 9), with the same 100 noise seeds for both: first from the start state (step 10), then from the state base GR00T
+      reached two chunks later (step 12).
+
+      <h6 id="poc_step10">Step 10: A Rotated Approach</h6>
+
+      <div class="row gx-0 mb-4 mt-4 align-items-center">
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 66%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./poc_fan_step10.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 13: 100 noise seeds from the step-10 state, base GR00T (gray) vs. the iteration-8 checkpoint (green). Bold lines are the means;
+                the shaded steps are the 8 the robot executes.</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+      </div>
+
+      <ul>
+        <li><strong>Same reach, new direction:</strong> x is unchanged (5.06 → 5.07) and z dips slightly (−3.07 → −3.16), but y changes shape. Base
+          levels off near 1.4, while iteration 8 keeps sweeping to 1.95 (+34%). By the end of the 8 executed steps, the two y fans no longer overlap.</li>
+        <li><strong>A rotated approach:</strong> the chunk's heading in the horizontal plane turns from 16° to 21°, and it turns for all 100 noise seeds.
+          The whole fan moved, so a random noise sample now lands on the new approach.</li>
+        <li><strong>Just the first chunk:</strong> this is one state and one chunk. <em>Much of the gain may come from later in the episode (the grasp and
+          the release), which these sweeps don't show.</em></li>
+      </ul>
+      <br>
+
+      <h6 id="poc_step12">Step 12: Reacting to a Blocked View</h6>
+      The same comparison at step 12 is shown (the camera view is in Fig. 11, bottom row). Note that there is no guarantee that the new policy actually ends up in this state, so its behavior in this 
+      state is purely for analysis:
+
+      <div class="row gx-0 mb-4 mt-4 align-items-center">
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 66%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./poc_fan_step12.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 14: The same 100 noise seeds from the step-12 state</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+      </div>
+
+      <ul>
+        <li><strong>Every seed shifts the same way:</strong> iteration 8 reaches less far forward (x: 3.06 → 2.85), swings further sideways
+          (y: 1.44 → 1.82), and drops lower (z: −0.83 → −1.00), turning its heading from 25° to 33°. All 100 seeds shift this way in x and y.</li>
+        <li><strong>Out of the blind spot:</strong> rather than pushing as far in under the machine, the trained policy swings out and down, suggesting it
+          learned to steer the wrist camera toward a clearer view of the mug before grasping.</li>
+      </ul>
+      <strong>Proof of Concept PASSED:</strong> from a state where base GR00T succeeds 10% of the time, Jitter-GRPO reached 92% in 6-8 updates by
+      carving out stronger basins of good actions (through some combination of either a multimodal (several valid strategies) fan or a tight unimodal fan around a good action).
+      <br><br><br>
+    </section>
+
+    <section id="full_training">
+      <hr>
+      <h2>Full Training Example</h2>
+
+      With the proof of concept passed on a difficult state, full training scales Jitter-GRPO to four random, unique CoffeeServeMug kitchens
+      (a frozen scene pool, seeds 100067–103067). Each group corresponds to one kitchen seed, and each group runs 12 episodes from the first frame of that kitchen,
+      for a total of 48 RoboCasa episodes per iteration of on-policy rollout data collection.
+      <br>
+      Across these four kitchens, base GR00T succeeds 66% of the time (verified via 160 independent rollouts of the base policy).
+      <br><br>
+
+      <h5 id="full_eval">Training and Evaluation: 66% → 86% Across Four Kitchens</h5>
+      <h6 id="full_curve">Training: Enough Jitter, Then AWR-on-Success</h6>
+      <div class="row gx-0 mb-4 mt-4 align-items-center">
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 66%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./full_success_rate.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 15: Success rate per iteration over the four kitchens; the dashed line marks when AWR-on-success was switched on</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+      </div>
+
+      <ul>
+        <li><strong>λ = 0.25 is too little jitter for four diverse kitchens:</strong> a first run at λ = 0.25, enough for the single state, stayed flat near
+          65% and then slipped. The FM surrogate caps a success's ratio near $e^{\mathrm{MSE}_{\text{ref}}} \approx 1.002$, so with too little jitter,
+          success rows have almost no headroom and erosion wins. No jitter at all would leave even less.</li>
+        <li><strong>λ = 0.4 learns:</strong> 16% jitter variance lifts success from 65% to 81% in four updates.</li>
+        <li><strong>AWR-on-success holds the lead:</strong> without it, the λ = 0.4 run peaked at 90% and then slid back to 73–75%. With
+          <a href="#awr_on_success">AWR-on-success</a> switched on after iteration 6 ($\kappa = 1.5$), reinforcement carries 1.6–1.8× the erosion
+          mass, and success holds at 77–90%, ending at 85%. (The iteration-6 dip is sampling noise: the same checkpoint scored 90% in the run
+          without AWR-on-success.)</li>
+      </ul>
+      <br>
+
+      <h6 id="full_eval_results">Independent Evaluation</h6>
+      To confirm the training curve, I evaluated the iteration-9 checkpoint (the policy behind iteration 10) with 40 fresh rollouts per kitchen,
+      against the same evaluation of base GR00T:
+
+      <div class="row gx-0 mb-4 mt-4 align-items-center">
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 66%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./full_eval.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 16: Success over 40 fresh rollouts per kitchen, base GR00T vs. the iteration-9 checkpoint</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+      </div>
+
+      <ul>
+        <li><strong>Every kitchen improves:</strong> +12.5 to +27.5 points per kitchen, and 66.3% → 86.3% overall, matching the 85% training curve.</li>
+        <li><strong>Failures drop by 59%:</strong> from 54 of 160 rollouts to 22. The hardest kitchen (102067) climbs from 52.5% to 72.5%, and
+          101067 reaches 97.5%.</li>
+        <li><strong>Successes come faster:</strong> a successful episode takes 333 steps on average, against 360 for base GR00T (−8%).</li>
+        <li><strong>Gains transfer to unseen kitchens:</strong> on 30 held-out kitchens (seeds 100–129, none of which were in the training set),
+          success rose from 48.9% to 60.0% (+11 points). Part of what the policy learned in four
+          kitchens carries over to 30 kitchens it has never seen, suggesting a future direction of including even more kitchens in the training set.</li>
+      </ul>
+      <br>
+
+      <h5 id="full_fans">A Tighter Fan in Every Kitchen</h5>
+      To see what changed, I repeated the 100-seed sweep from each kitchen's first observation (step 0), through base GR00T and the iteration-9
+      checkpoint, with the same 100 noise seeds for both. Fig. 17 shows the fans in 3D, and Fig. 18 views them from above.
+
+      <div class="row gx-0 mb-4 mt-4 align-items-center">
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 66%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./full_fans3d.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 17: 100 noise seeds from each kitchen's first observation, in 3D. Shaded ellipsoids cover 2σ of the chunk endpoints, thin lines
+                are 30 of the 100 seeds' paths, and stdev is the combined standard deviation of the endpoints in x, y and z.</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 17%; padding:0;" class="custom-column">
+        </div>
+      </div>
+
+      <div class="row gx-0 mb-4 mt-4 align-items-center">
+        <div style="width: 20%; padding:0;" class="custom-column">
+        </div>
+
+        <div style="width: 60%; padding:0;" class="custom-column">
+          <figure style="margin: 0;">
+            <img src="./full_fans.png" class="img-fluid">
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 18: The same sweeps viewed top-down. Dots are chunk endpoints, and ellipses cover 2σ.</em>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div style="width: 20%; padding:0;" class="custom-column">
+        </div>
+      </div>
+
+      At the final step of the 16-step action chunk, the standard deviation of the 100 endpoints shrinks by 21–25% in every kitchen, and along every
+      axis (0.65–0.81× base):
+      <div class="row gx-4 mt-3 mb-4 justify-content-center">
+        <div class="col-lg-9">
+          <figure style="margin: 0;">
+            <table class="table table-bordered table-sm mb-1" style="font-size: 0.9em; text-align: center;">
+              <tr style="background-color: #f2f2f2;">
+                <th>Kitchen</th>
+                <th>stdev x</th>
+                <th>stdev y</th>
+                <th>stdev z</th>
+                <th>Combined stdev, $\sqrt{\sigma_x^2 + \sigma_y^2 + \sigma_z^2}$</th>
+              </tr>
+              <tr>
+                <td style="background-color: #f3f0ff; font-weight: 600;">100067</td>
+                <td>1.12 → 0.81</td>
+                <td>0.84 → 0.69</td>
+                <td>0.94 → 0.74</td>
+                <td>1.69 → 1.29 (0.76×)</td>
+              </tr>
+              <tr>
+                <td style="background-color: #f3f0ff; font-weight: 600;">101067</td>
+                <td>1.34 → 0.99</td>
+                <td>0.95 → 0.77</td>
+                <td>1.05 → 0.83</td>
+                <td>1.95 → 1.50 (0.77×)</td>
+              </tr>
+              <tr>
+                <td style="background-color: #f3f0ff; font-weight: 600;">102067</td>
+                <td>1.71 → 1.37</td>
+                <td>0.70 → 0.53</td>
+                <td>0.56 → 0.36</td>
+                <td>1.93 → 1.51 (0.79×)</td>
+              </tr>
+              <tr>
+                <td style="background-color: #f3f0ff; font-weight: 600;">103067</td>
+                <td>1.34 → 1.05</td>
+                <td>0.77 → 0.57</td>
+                <td>0.83 → 0.56</td>
+                <td>1.75 → 1.32 (0.75×)</td>
+              </tr>
+              <tr>
+                <td style="background-color: #f3f0ff; font-weight: 600;">Average</td>
+                <td>1.38 → 1.06</td>
+                <td>0.82 → 0.64</td>
+                <td>0.84 → 0.62</td>
+                <td>1.83 → 1.41 (0.77×)</td>
+              </tr>
+            </table>
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 19: Standard deviation of the chunk endpoints across the 100 noise seeds, base GR00T → iteration-9 checkpoint. Measured only on
+                the first action chunk's endpoint (its final step) from each kitchen's first observation.</em>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      Both policies start each seed from the same initial noise, so their chunks pair up seed by seed, which shows how the fan shrinks:
+      <ul>
+        <li><strong>Closer to center:</strong> 98–100% of seeds land closer to their fan's mean after the 8 executed steps, and 94–100% by the end
+          of the 16-step chunk.</li>
+        <li><strong>Offset correlation:</strong> at least 0.98 between each seed's offset from the center under base and under the checkpoint (per
+          axis). Each seed keeps its direction from the center, and only its distance shrinks.</li>
+        <li><strong>Center shift:</strong> the fan's mean moves by only 6–24% of the base combined stdev.</li>
+      </ul>
+
+      <ul>
+        <li><strong>Just the first chunk:</strong> these sweeps cover one state (step 0) and one chunk per kitchen. <em>Much of the gain may come
+          from later in the episode (the grasp and the release), which these sweeps don't show.</em></li>
+      </ul>
+      In the proof of concept, the fan moved to a new approach. Across four kitchens, Jitter-GRPO instead tightens each fan around its center: the
+      <em>tight unimodal fan around a good action</em> the <a href="#mean_action">motivation</a> called for.
+      <br><br>
+
+      <h5 id="full_noise">Jacobian Penalty Leads to Less Noise Leaking into the Actions</h5>
+      <u>As a result of Jitter-GRPO's Jacobian penalty, less noise leaks into the actions.</u> All 100 seeds in a kitchen use the same observation
+      and the same weights, so any difference between their chunks comes from the noise. For each seed $s$, take the DiT's raw 16×3 end-effector
+      action $a_s$ and its initial noise $\varepsilon_s$. Both live in the same normalized space, because denoising starts at $a^0 = \varepsilon$.
+      <ol>
+        <li><strong>Keep only the high frequencies.</strong>
+          <ul>
+            <li>Subtract the seed-average chunk, which is identical for every seed and contains no noise.</li>
+            <li>Take an FFT (Fourier transform) of each 16-step sequence and zero the three slowest frequencies: the constant offset, then 1 and 2
+              cycles per chunk. This is $\tilde{a}$.</li>
+            <li>$\tilde{\varepsilon}$ is the noise put through the same two steps: subtract the seed-average noise (nearly zero, since each seed's
+              noise is random) and zero its three slowest frequencies.</li>
+            <li><em>Why drop the three slowest modes?</em>
+              <ul>
+                <li>They are where the noise is supposed to act: a seed picks the chunk's overall direction and curvature within the fan, which is
+                  exactly what Figs. 17–19 measure. That's choosing a motion, not copying noise, so leaving them in would just re-measure fan width.
+                  The noise, in contrast, is white, with equal energy at every frequency, while real motions are smooth. Fast content that tracks the
+                  noise step for step is therefore leakage, and it shows up as jerk.</li>
+                <li>Across the four kitchens, <em>97–98.5% of the actions' seed-to-seed energy sits in those three modes, against about 30% for the white
+                  noise.</em></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><strong>Regress:</strong> fit $\tilde{a} \approx \beta\,\tilde{\varepsilon}$ by least squares over every seed, step and axis,
+          $$\beta = \frac{\sum \tilde{a} \cdot \tilde{\varepsilon}}{\sum \tilde{\varepsilon}^{\,2}}$$
+          Plot each noise value against the matching action value, and $\beta$ is the slope of the best-fit line. There's no intercept because both
+          are zero-mean.
+          <ul>
+            <li><em>Why is the slope the share passed through unchanged?</em>
+              <ul>
+                <li>Suppose the action's fast part is a scaled copy of the noise's fast part plus something unrelated,
+                  $\tilde{a} = c\,\tilde{\varepsilon} + r$. Then the fit recovers $\beta \approx c$, because the unrelated part $r$ averages out.
+                  "Unchanged" means the same step-by-step pattern, just scaled by $c$.</li>
+                <li>At $\tau = 0$ the chunk <em>is</em> the noise, so $c = 1$; a perfect denoiser would erase it, so $c = 0$. Base GR00T keeps about
+                  0.5–0.7%.</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      Fig. 20 reports $\beta$ for base GR00T and the checkpoint in each kitchen:
+      <div class="row gx-4 mt-3 mb-4 justify-content-center">
+        <div class="col-lg-6">
+          <figure style="margin: 0;">
+            <table class="table table-bordered table-sm mb-1" style="font-size: 0.9em; text-align: center;">
+              <tr style="background-color: #f2f2f2;">
+                <th>Kitchen</th>
+                <th>Noise passed through ($\beta$), base GR00T → checkpoint</th>
+              </tr>
+              <tr>
+                <td style="background-color: #f3f0ff; font-weight: 600;">100067</td>
+                <td>0.50% → 0.38% (0.75×)</td>
+              </tr>
+              <tr>
+                <td style="background-color: #f3f0ff; font-weight: 600;">101067</td>
+                <td>0.57% → 0.33% (0.58×)</td>
+              </tr>
+              <tr>
+                <td style="background-color: #f3f0ff; font-weight: 600;">102067</td>
+                <td>0.61% → 0.35% (0.57×)</td>
+              </tr>
+              <tr>
+                <td style="background-color: #f3f0ff; font-weight: 600;">103067</td>
+                <td>0.68% → 0.56% (0.83×)</td>
+              </tr>
+              <tr>
+                <td style="background-color: #f3f0ff; font-weight: 600;">Average</td>
+                <td>0.59% → 0.40% (0.68×)</td>
+              </tr>
+            </table>
+            <figcaption style="text-align: center; font-size: 0.8em; margin-top: 5px;">
+              <em>Fig. 20: $\beta$, the share of each seed's initial noise that passes unchanged into its action's step-to-step wiggle. Measured only on the first
+                action chunk from each kitchen's first observation.</em>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+      In every kitchen, the <strong><u>checkpoint passes 17–43% less of its initial noise straight into its actions (0.68× base on
+      average)</u></strong>.
+      <br><br>
+      <em>Isn't this just the tighter fan?</em> If the checkpoint only shrank every seed's deviation from the mean, the fast wiggle would shrink by
+      the same factor as the fan and still copy the noise exactly. Two checks say otherwise:
+      <ul>
+        <li>The fast wiggle shrinks much less than the fan: to 0.84–0.94× base, against 0.77–0.79× for the three slow modes.</li>
+        <li>What's left looks less like the noise. The correlation between each seed's $\tilde{a}$ and its own $\tilde{\varepsilon}$, which no
+          amount of shrinking can change, falls from 0.41–0.44 to 0.26–0.31.</li>
+      </ul>
+      The drop in noise passed through comes mostly from the wiggle decorrelating from the noise, not from the fan
+      getting smaller.
+      <br><br>
+      This is exactly the behavior the <a href="#jitter_jacobian">Jacobian penalty</a> was built to produce. On every
+      success, a jittered row asks the DiT to land on the same action from nearby noise, which in expectation penalizes the endpoint Jacobian
+      $\|I + (1 - \tau)\,\partial v_\theta / \partial x\|_F^2$: how far the predicted action moves when the noise moves. A field with a smaller
+      endpoint Jacobian absorbs input noise instead of copying it into the action, and that is what the measurement shows, in all four kitchens,
+      with no extra network, no double backward pass, and no change to the sampler. Together with the 21–25% tighter fans above, both ends of the
+      spectrum respond: the slow, noise-driven choice of motion narrows, and the fast wiggle copied from the noise shrinks.
+      <br><br>
+      <strong>Full Training PASSED:</strong> with jitter, along with late-enabled AWR-on-success for stability, Jitter-GRPO raised GR00T's success
+      across four kitchens from 66% to 86%, cut failures by 59%, and tightened every fan.
+      <br><br><br>
+    </section>
+
+    <section id="future_directions">
+      <hr>
+      <h2>Future Directions / Reflections</h2>
+
+      <h6>Reflections</h6>
+      <ul>
+        <li><strong>Larger groups are the clearest next lever.</strong> GRPO learns only from groups that mix successes and failures. At 85–90%
+          success, a group of 12 rollouts often comes back all-success: in the last full-training iterations, one of the four kitchens did so in 5 of
+          6 iterations, leaving a quarter of each batch without an improvement signal. Doubling the group to 24 cuts the odds of an all-success group
+          at 90% success from 28% to 8%, samples twice as many of the rare failures and successes, and tightens each kitchen's baseline from ±10 to
+          ±7 points (at 85% success). The catch is cost: collection time grows linearly with group size, and I'm GPU poor, so every extra rollout is
+          more AWS EC2 time.</li>
+        <li><strong>On-policy data is expensive.</strong> Simulating one episode takes about 2.4 minutes of wall-clock time (physics, three cameras,
+          and ~45 GR00T queries), against ~18 seconds for a real robot to run the same ~360 steps at 20 Hz. Each iteration's 48 episodes take
+          ~29 minutes on four parallel simulators, about two-thirds of every ~45-minute iteration on a single A10G (24 GB VRAM). After living with
+          that loop, I appreciate the appeal of off-policy RL a lot more.</li>
+      </ul>
+
+      <h6>Next Steps</h6>
+      <ul>
+        <li><strong>More, and rotating, kitchens.</strong> Four fixed training kitchens already lift 30 held-out kitchens from 48.9% to 60.0%, so
+          broader training should transfer further. More groups (one per kitchen) widen each update but, like larger groups, grow collection time
+          linearly. Rotating groups keeps the cost fixed: draw four new kitchens every iteration, so a 10-iteration run trains on 40 kitchens instead
+          of 4. Fresh kitchens are also rarely mastered, so their groups stay mixed instead of coming back all-success.</li>
+        <li><strong>More epochs per iteration (an off-policy extension).</strong> An extra training epoch costs ~4 minutes, against ~29 minutes to
+          collect fresh rollouts, so reusing each batch longer is cheap. Jitter makes this safe: $\xi$ is redrawn on every forward pass, so each epoch
+          sees new perturbations and success rows keep a fresh learning signal, while failure rows that use up their erosion budget are simply
+          clipped.</li>
+        <li><strong>Dynamic jitter.</strong> Both experiments needed a hand-tuned increase in λ when learning stalled (0.125 → 0.25 for the single
+          state, 0.25 → 0.4 for four kitchens). A controller could raise λ when success rows run out of headroom and lower it once the field has
+          absorbed it, possibly varying λ across the extra epochs above.</li>
+        <li><strong>Velocity anchor.</strong> Penalize how far the trained velocity field drifts from base GR00T's at the same inputs,
+          $\|v_\theta - v_{\text{base}}\|^2$. This pulls every output direction back
+          toward the pretrained field, protecting the skills GR00T already has over longer runs (similar to a KL penalty).</li>
+        <li><strong>Pre-close chunk filtering.</strong> Within a group, successes and failures approach the mug almost identically, so their approach
+          chunks get opposite advantages and largely cancel. Keeping only a failure's last few chunks before the gripper closes would remove that
+          cancellation: the successes' approach is reinforced cleanly, and the failure signal concentrates on the failed grasp. It complements the
+          post-reopen truncation, which trims what comes after a failed grasp.</li>
+      </ul>
+      <br>
+    </section>
+
+    <section id="code">
+      <hr>
+      <h2>Full Code</h2>
+      All code developed for this project is distributed in 3 directories, all in my fork of Isaac-GR00T:
+      <ul>
+        <li><a href="https://github.com/arnavinator/Isaac-GR00T/tree/main/scripts/grpo" target="_blank">Jitter-GRPO training code</a>:
+          the trainer, FM surrogate, jitter, relative lower clip, AWR-on-success, and RoboCasa rollout collection</li>
+        <li><a href="https://github.com/arnavinator/Isaac-GR00T/tree/main/grpo_data" target="_blank">Training data</a>: logs and results from
+          the experiments on this page</li>
+        <li><a href="https://github.com/arnavinator/Isaac-GR00T/tree/main/scripts/denoising_lab/eval/strategies/consensus_noise_mode_selection"
+          target="_blank">Consensus noise-mode selection</a>: the inference-time strategy from the motivation section <a href="#mean_action">"Is the mean a good action?"</a></li>
+      </ul>
+      <br>
+    </section>
+
+
+  </div>
+
+  <!-- Back-to-Top button -->
+  <div id="backToTop" title="Go to top">  Back to Top ▲  </div>
+  <script>
+    // Get the button
+    const backToTopBtn = document.getElementById('backToTop');
+
+    // 1) Show/hide button when scrolling
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        // If scrolled more than 300px, show the button
+        backToTopBtn.classList.add('show');
+        backToTopBtn.classList.remove('hide');
+      } else {
+        // Otherwise, hide it
+        backToTopBtn.classList.add('hide');
+        backToTopBtn.classList.remove('show');
+      }
+    });
+
+    // // scroll to top on hover
+    // backToTopBtn.addEventListener('mouseenter', () => {
+    //   window.scrollTo({ top: 0, behavior: 'smooth' });
+    // });
+
+    // scroll to top on click
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+
+  <script>
+    fetch("../dropdownL2.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("dropdown-content").innerHTML = html;
+      });
+  </script>
+
+</body>
+
+<footer class="footer-bar">
+  <div class="container text-center py-2">
+    <a
+      class="footer-link"
+      href="https://www.linkedin.com/in/arnav-srivastava/"
+      target="_blank"
+      rel="noopener"
+    >
+      <p class="fs-5">
+        Want to get in touch? Reach out to me on LinkedIn
+        <i class="bi bi-linkedin" style="font-size: 1.5rem;"></i>
+      </p>
+    </a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" ></script>
+
+</html>

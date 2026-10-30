@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>Arnav's Engineering Portfolio</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="./style.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-sm navbar-dark">
+    <div class="container-fluid d-flex justify-content-between align-items-center px-5">
+      <h2 class="nav-title">Arnav's Engineering Portfolio</h2>
+      <div class="navbar-nav">
+        <a class="nav-link active" href="./index.html">Home</a>
+        <a class="nav-link" href="./about.html">About Me</a>
+
+        <div class="nav-item dropdown">
+          <!-- now a normal in-page link -->
+          <a
+            class="nav-link"
+            href="#selected-work"
+            id="projectsDropdown"
+            aria-expanded="false"
+          >
+            Selected Work <span style="margin-left:1px; font-size:0.99em;">▾</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="projectsDropdown" id="dropdown-content"></ul>
+        </div>
+        
+      </div>
+    </div>
+  </nav>
+  
+
+  <!-- red background "hero" section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="row align-items-center">  
+        <!-- Text column, md 7/12 of row; ps/pe is left/right padding -->
+        <div class="col-md-7 pe-lg-5 ps-lg-5">
+          <h1 class="display-4">HI, MY NAME IS ARNAV.</h1>
+          <p>
+            Currently, I’m a Silicon Design Engineer @ Apple (more
+            <a href="./about.html" class="text-white text-decoration-underline">here</a>).
+          </p>
+
+          <p>
+            <strong>
+              This website showcases my recent <u>machine learning</u> projects,
+              with an <em>emphasis on implementing algorithms <u>from scratch</u></em>.
+            </strong>
+          </p>
+          <!-- mb-1 set bottom-margin to 0.25rem (instead of the default 1rem).  -->
+          <p class="mb-1">
+            I have a demonstrated ground-up understanding of:
+          </p>
+          <!-- mt-1 sets top-margin to 0.25rem -->
+          <ul class="ps-3 fs-6 mt-1">
+            <li>Reinforcement learning (PPO, GRPO, DQN, AWR)</li>
+            <li>Transformer Models (MHA/MLA, MoE FFN, VLA, LoRA)</li>
+            <li>GenAI systems (RAG, agentic workflows)</li>
+          </ul>
+            
+          <p>
+            I’m eager to grow alongside intelligent people, apply ML to hard interdisciplinary problems, and push forward the envelope on intelligent systems.
+          </p>
+        </div>
+
+        <!-- Image column, md 5/12 of row -->
+        <div class="col-md-5 text-left ps-lg-5 pe-lg-5">
+          <figure class="figure">
+            <!-- Crop: aspect-ratio is width / height (raise it for a shorter photo); the second
+                 object-position value picks the vertical crop (0% keeps the top, 100% the bottom) -->
+            <img
+              src="./home_pic.jpg"
+              alt="Arnav Srivastava"
+              class="figure-img img-fluid rounded"
+              style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover; object-position: 50% 40%;"
+            >
+            <figcaption class="figure-caption text-white ps-2">
+              <p class="fst-italic mb-0" style="font-size: 1.1rem; font-weight: 600;">
+                Harvard University, Class of 2023
+              </p>
+              <ul class="ps-3 fs-6 mb-0">
+                <li>B.A. in Physics, minor in Computer Science</li>
+                <li>M.S. in Electrical & Computer Engineering</li>
+              </ul>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- white background selected work section w/ Feynman quote -->
+  <section id="selected-work" class="selected-work-section">
+    <h2 class="selected-work-title">SELECTED WORK</h2>
+    <p class="selected-work-quote">
+      "What I cannot create, I do not understand" — Richard Feynman
+    </p>
+  </section>
+  
+
+  <!-- portfolio grid -->
+
+  <div class="container bg-3 text-center px-5">
+    
+    <div class="row gx-5 mb-4">
+      <div class="col-sm-4 d-flex flex-column align-items-center">
+        <a href="./half_cheetah_ppo_grpo/index.html">
+          <div class="d-flex justify-content-center align-items-center" style="height:360px; width:100%;">
+            <video autoplay muted loop playsinline style="max-height:100%; max-width:109%;">
+              <source src="./half_cheetah_ppo_grpo/best_video_merge.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <h5 class="mt-0 mb-0">PPO vs GRPO HalfCheetah Agents</h5>
+          <h6 class="mt-0 mb-0">Proximal Policy Optimization and</h6>
+          <h6 class="mt-0 mb-0">Group Relative Policy Optimization</h6>
+          <h6 class="mt-0 mb-0">teach Cheetah Robots how to run</h6>
+        </a>
+      </div>
+
+      <div class="col-sm-4 d-flex flex-column align-items-center">
+        <a href="./jitter_grpo/index.html">
+          <div class="d-flex justify-content-center align-items-center" style="height:360px; width:100%;">
+            <video autoplay muted loop playsinline style="max-height:100%; max-width:100%;">
+              <source src="./jitter_grpo/CoffeeServeMug_success_2panel.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <h5 class="mt-0 mb-0">Jitter-GRPO: New Research in</h5>
+          <h5 class="mt-0 mb-0">Fine-Tuning Flow Matching VLAs</h5>
+          <h6 class="mt-0 mb-0">Jitter noise to GRPO FM surrogate</h6>
+          <h6 class="mt-0 mb-0">for PEFT on NVIDIA's Isaac GR00T VLA</h6>
+        </a>
+      </div>
+
+      <div class="col-sm-4 d-flex flex-column align-items-center">
+        <a href="./tiny_LM/index.html">
+          <div class="d-flex justify-content-center align-items-center" style="height:360px; width:93%;">
+            <video autoplay muted loop playsinline style="max-height:100%; max-width:95%;">
+              <source src="./tiny_LM/tiny_LM_demo.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <h5 class="mt-0 mb-0">Movie Dialog Language Model</h5>
+          <h6 class="mt-0 mb-0">Tiny Transformer Model w/ DeepSeek-R1</h6>
+          <h6 class="mt-0 mb-0">architecture (trained on movie scripts)</h6>
+        </a>
+      </div>
+    </div>
+
+    <div class="row gx-5 mb-4">
+      <div class="col-sm-4 d-flex flex-column align-items-center">
+        <a href="./snake_dqn/index.html">
+          <div class="d-flex justify-content-center align-items-center" style="height:300px; width:100%;">
+            <video autoplay muted loop playsinline style="max-height:80%; max-width:100%;">
+              <source src="./snake_dqn/snake_play_crop.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <h5 class="mt-0 mb-0">Deep-Q Network Snake Agent</h5>
+          <h6 class="mt-0 mb-0">Off-Policy Reinforcement Learning Agent</h6>
+          <h6 class="mt-0 mb-0">teaches itself how to play Snake</h6>
+        </a>
+      </div>
+
+      <div class="col-sm-4 d-flex flex-column align-items-center">
+        <a href="./voice_agent_pcie_rag/index.html">
+          <div class="d-flex justify-content-center align-items-center" style="height:300px; width:100%;">
+            <video autoplay muted loop playsinline style="max-height:100%; max-width:100%;">
+              <source src="./voice_agent_pcie_rag/PCIe_agent_homepage_demo.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <h5 class="mt-0 mb-0">PCIe Conversational Assistant</h5>
+          <h6 class="mt-0 mb-0">RAG, Speech-to-Text, and</h6>
+          <h6 class="mt-0 mb-0">Text-to-Speech Models create a PCIe </h6>
+          <h6 class="mt-0 mb-0">Specification-Parsing Assistant</h6>
+        </a>
+      </div>
+
+      <div class="col-sm-4 d-flex flex-column align-items-center">
+        <a href="./ur5e_bob/index.html">
+          <div class="d-flex justify-content-center align-items-center" style="height:300px; width:100%;">
+            <video autoplay muted loop playsinline style="max-height:85%; max-width:100%;">
+              <source src="./ur5e_bob/ur5e_bob.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <h5 class="mt-0 mb-0">UR5e Block Manipulator</h5>
+          <h6 class="mt-0 mb-0">IMU-guided Inverse Kinematics +</h6>
+          <h6 class="mt-0 mb-0">Automatic Object Detection & Grabbing</h6>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <br>
+
+
+  <!-- Back-to-Top button -->
+  <div id="backToTop" title="Go to top">  Back to Top ▲  </div>
+  <script>
+    // Get the button
+    const backToTopBtn = document.getElementById('backToTop');
+  
+    // 1) Show/hide button when scrolling
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        // If scrolled more than 300px, show the button
+        backToTopBtn.classList.add('show');
+        backToTopBtn.classList.remove('hide');
+      } else {
+        // Otherwise, hide it
+        backToTopBtn.classList.add('hide');
+        backToTopBtn.classList.remove('show');
+      }
+    });
+  
+    // // scroll to top on hover
+    // backToTopBtn.addEventListener('mouseenter', () => {
+    //   window.scrollTo({ top: 0, behavior: 'smooth' });
+    // });
+
+    // scroll to top on click
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+
+  <script>
+    fetch("./dropdown.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("dropdown-content").innerHTML = html;
+      });
+  </script>
+</body>
+
+<footer class="footer-bar">
+  <div class="container text-center py-2">
+    <a
+      class="footer-link"
+      href="https://www.linkedin.com/in/arnav-srivastava/"
+      target="_blank"
+      rel="noopener"
+    >
+      <p class="fs-5">
+        Want to get in touch? Reach out to me on LinkedIn
+        <i class="bi bi-linkedin" style="font-size: 1.5rem;"></i>
+      </p>
+    </a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" ></script>
+
+</html>

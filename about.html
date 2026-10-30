@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>Arnav's Engineering Portfolio</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="./style.css" rel="stylesheet">
+  
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],    // delimiters for inline math
+        displayMath: [['$$', '$$'], ['\\[', '\\]']] // delimiters for display math
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+</head>
+
+
+<body>
+
+  <nav class="navbar navbar-expand-sm navbar-dark">
+    <div class="container-fluid d-flex justify-content-between align-items-center px-5">
+      <h2 class="nav-title">Arnav's Engineering Portfolio</h2>
+      <div class="navbar-nav">
+        <a class="nav-link" href="./index.html">Home</a>
+        <a class="nav-link active" href="./about.html">About Me</a>
+
+        <div class="nav-item dropdown">
+          <!-- now a normal in-page link -->
+          <a
+            class="nav-link"
+            href="./index.html#selected-work"
+            id="projectsDropdown"
+            aria-expanded="false"
+          >
+            Selected Work <span style="margin-left:1px; font-size:0.99em;">▾</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="projectsDropdown" id="dropdown-content"></ul>
+        </div>
+        
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero-section-about">
+    <div class="textcontainer">
+
+      <h2 class="oswald-heading">FROM <span style="color: rgb(121, 191, 139);">HARDWARE</span>..... TO <span style="color: rgb(163, 220, 239);">ML</span>???</h2>
+  
+    </div>
+  
+  </section>
+
+  <div class="textcontainer">
+
+    <h2 class="oswald-heading">FROM <span style="color: rgb(108, 183, 127);">HARDWARE</span></h2>
+    <p class="mb-1">I am currently a Silicon Design Engineer @ Apple.</p>
+    
+    <ul class="ps-3 fs-6 mt-0">
+      <li>I own end-to-end design of low-power, high-speed data-exchange (PCIe) <u>silicon</u> and <u>firmware</u> that goes into all Apple silicon 
+        <br>
+        (iPhone📱, Mac 💻, Watch ⌚, Vision Pro 🥽, other secret stuff...).</li>
+        <li>This hardware is needed whenever you access system memory or use WiFi/Cellular/Bluetooth capabilities in Apple devices (make a phone call, 
+          browse the internet, view a photo, use an LLM, etc.)</li>
+    </ul>
+
+    <p>I love my work in silicon design: I get to engineer cutting-edge systems 
+      used by billions of consumers, collaborate with really smart people, and grow as a problem-solver. </p>
+
+    <p>It has been a true privilege to learn about and contribute to modern computing infrastructure. 
+      I'll always be grateful for the opportunity to deeply understand complex machines and expand my systems thinking during my tenure as a silicon engineer.</p>
+
+      <br>
+      
+    <h2 class="oswald-heading">TO <span style="color: rgb(108, 166, 183);">ML</span></h2>
+    <p>Over the past few years, I've developed a passion for machine learning. I'm excited to tackle complex problems
+      well suited to ML, helping implement the best approaches to build reliable, efficient models that enhance customer experiences.</p>
+
+    <p>I've spent over three years working on complex silicon systems, developing the rigor to design, debug, optimize, and bring
+      sophisticated systems to life. Building on my coursework in machine learning,
+      signal processing, and hardware design, as well as independent study, I'm eager to bring that same rigor to ML.</p>
+
+    <p>I have a strong conviction to spend my career building ML that's user-facing and impactful.</p>
+  
+
+  </div>
+
+  <!-- Back-to-Top button -->
+  <div id="backToTop" title="Go to top">  Back to Top ▲  </div>
+  <script>
+    // Get the button
+    const backToTopBtn = document.getElementById('backToTop');
+  
+    // 1) Show/hide button when scrolling
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        // If scrolled more than 300px, show the button
+        backToTopBtn.classList.add('show');
+        backToTopBtn.classList.remove('hide');
+      } else {
+        // Otherwise, hide it
+        backToTopBtn.classList.add('hide');
+        backToTopBtn.classList.remove('show');
+      }
+    });
+  
+    // // scroll to top on hover
+    // backToTopBtn.addEventListener('mouseenter', () => {
+    //   window.scrollTo({ top: 0, behavior: 'smooth' });
+    // });
+
+    // scroll to top on click
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+
+  <script>
+    fetch("./dropdown.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("dropdown-content").innerHTML = html;
+      });
+  </script>
+
+</body>
+
+<footer class="footer-bar">
+  <div class="container text-center py-2">
+    <a
+      class="footer-link"
+      href="https://www.linkedin.com/in/arnav-srivastava/"
+      target="_blank"
+      rel="noopener"
+    >
+      <p class="fs-5">
+        Want to get in touch? Reach out to me on LinkedIn
+        <i class="bi bi-linkedin" style="font-size: 1.5rem;"></i>
+      </p>
+    </a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" ></script>
+
+</html>
